@@ -17,4 +17,33 @@ public enum Terrain {
 	public String getTerString() {
 		return value;
 	}
+	
+    public static Terrain getEnum(String input){
+    	Terrain output;
+    	
+    	switch(input){
+    	case "X":
+    		output = Terrain.NONE;
+    		break;
+    	case "R":
+    		output = Terrain.ROCK;
+    		break;
+    	case "N":
+    		output = Terrain.SOIL;
+    		break;
+    	case "G":
+    		output = Terrain.GRAVEL;
+    		break;
+    	case "S":
+    		output = Terrain.SAND;
+    		break;
+    	case "F":
+    		output = Terrain.FLUID;
+    		break;
+
+    	default:
+    		output = Terrain.NONE;
+    	}	
+    	return output;
+    }
 }

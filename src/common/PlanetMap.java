@@ -5,6 +5,12 @@ public class PlanetMap {
 	private int mapWidth;
 	private int mapHeight;
 	
+	public PlanetMap(){
+		this.mapHeight = 0;
+		this.mapWidth = 0;
+		this.planetMap = null;
+	}
+	
 	// width is number of columns is xloc, height is number of rows is yloc
 	public PlanetMap(int width, int height){
 		this.mapHeight = height;
@@ -15,44 +21,29 @@ public class PlanetMap {
 				this.planetMap[i][j] = new MapTile();
 			}
 		}
-		// temporary use for creating planet terrain for testing
-		this.planetMap[7][7] = new MapTile("R"); 
-		this.planetMap[7][8] = new MapTile("R"); 
-		this.planetMap[8][7] = new MapTile("R"); 
-		this.planetMap[8][8] = new MapTile("R");
-		
-		this.planetMap[15][16] = new MapTile("R"); 
-		this.planetMap[15][17] = new MapTile("R"); 
-		this.planetMap[15][18] = new MapTile("R"); 
-		this.planetMap[15][19] = new MapTile("R"); 
-		this.planetMap[14][18] = new MapTile("R"); 
-		this.planetMap[14][19] = new MapTile("R"); 
-		this.planetMap[14][20] = new MapTile("R"); 
-		this.planetMap[14][21] = new MapTile("R"); 
-		
-		this.planetMap[6][23] = new MapTile("R");
-		this.planetMap[7][23] = new MapTile("R");
-		this.planetMap[7][23] = new MapTile("R");
-		this.planetMap[8][24] = new MapTile("R");
-		this.planetMap[8][25] = new MapTile("R");
-		
-		this.planetMap[24][10] = new MapTile("S");
-		this.planetMap[24][11] = new MapTile("S");
-		this.planetMap[24][12] = new MapTile("S");
-		this.planetMap[25][10] = new MapTile("S");
-		this.planetMap[25][11] = new MapTile("S");
-		this.planetMap[25][12] = new MapTile("S");
-		this.planetMap[25][13] = new MapTile("S");
-		this.planetMap[26][10] = new MapTile("S");
-		this.planetMap[26][11] = new MapTile("S");
-		this.planetMap[26][12] = new MapTile("S");
-		this.planetMap[26][13] = new MapTile("S");
+	}
+	
+	public PlanetMap(int width, int height, String fname){
+		this.mapHeight = height;
+		this.mapWidth = width;
+		this.planetMap = new MapTile[width][height];
+		for(int j=0;j<height;j++){
+			for(int i=0;i<width;i++){
+				this.planetMap[i][j] = new MapTile();
+			}
+		}
 	}
 	
 	public PlanetMap(String filename){
-		
+
 	}
 	
+	public PlanetMap(PlanetMap planetMapIn) {
+		planetMap = planetMapIn.planetMap;
+		mapWidth = planetMapIn.mapWidth;
+		mapHeight = planetMapIn.mapHeight;
+	}
+
 	public void setTile(MapTile tile, int xloc, int yloc){
 		this.planetMap[xloc][yloc] = tile;
 	}
@@ -98,9 +89,9 @@ public class PlanetMap {
 			}	
 		}
 		
-		System.out.println("PLANET_MAP: ---- print roverLoc ----");
-			rloc.printRovers();
-			System.out.println("PLANET_MAP: ^^^^^ print roverLoc ^^^^");	
+		//System.out.println("PLANET_MAP: ---- print roverLoc ----");
+			//rloc.printRovers();
+			//System.out.println("PLANET_MAP: ^^^^^ print roverLoc ^^^^");	
 		return new ScanMap(tMap, edgeSize, coord);
 	}
 	
@@ -110,5 +101,69 @@ public class PlanetMap {
 	
 	public int getHeight(){
 		return mapHeight;
+	}
+	
+	public void loadExampleTestPlanetMapTerrain(){
+		// temporary use for creating planet terrain for testing
+		
+		this.mapHeight = 40;
+		this.mapWidth = 40;
+		this.planetMap = new MapTile[mapWidth][mapHeight];
+		for(int j=0;j<mapHeight;j++){
+			for(int i=0;i<mapWidth;i++){
+				this.planetMap[i][j] = new MapTile();
+			}
+		}
+		
+		this.planetMap[7][7] = new MapTile("R"); 
+		this.planetMap[7][8] = new MapTile("R"); 
+		this.planetMap[8][7] = new MapTile("R"); 
+		this.planetMap[8][8] = new MapTile("R");
+		
+		this.planetMap[15][16] = new MapTile("R"); 
+		this.planetMap[15][17] = new MapTile("R"); 
+		this.planetMap[15][18] = new MapTile("R"); 
+		this.planetMap[15][19] = new MapTile("R"); 
+		this.planetMap[14][18] = new MapTile("R"); 
+		this.planetMap[14][19] = new MapTile("R"); 
+		this.planetMap[14][20] = new MapTile("R"); 
+		this.planetMap[14][21] = new MapTile("R"); 
+		
+		this.planetMap[6][23] = new MapTile("R");
+		this.planetMap[7][23] = new MapTile("R");
+		this.planetMap[7][23] = new MapTile("R");
+		this.planetMap[8][24] = new MapTile("R");
+		this.planetMap[8][25] = new MapTile("R");
+		
+		this.planetMap[24][10] = new MapTile("S");
+		this.planetMap[24][11] = new MapTile("S");
+		this.planetMap[24][12] = new MapTile("S");
+		this.planetMap[25][10] = new MapTile("S");
+		this.planetMap[25][11] = new MapTile("S");
+		this.planetMap[25][12] = new MapTile("S");
+		this.planetMap[25][13] = new MapTile("S");
+		this.planetMap[26][10] = new MapTile("S");
+		this.planetMap[26][11] = new MapTile("S");
+		this.planetMap[26][12] = new MapTile("S");
+		this.planetMap[26][13] = new MapTile("S");
+	}
+	
+	public void loadSmallExampleTestPlanetMapTerrain(){
+		// temporary use for creating planet terrain for testing
+		
+		this.mapHeight = 5;
+		this.mapWidth = 5;
+		this.planetMap = new MapTile[mapWidth][mapHeight];
+		for(int j=0;j<mapHeight;j++){
+			for(int i=0;i<mapWidth;i++){
+				this.planetMap[i][j] = new MapTile();
+			}
+		}
+		
+		this.planetMap[2][2] = new MapTile("R"); 
+		this.planetMap[3][2] = new MapTile("R"); 
+		this.planetMap[1][4] = new MapTile("R"); 
+	
+		this.planetMap[3][3] = new MapTile("S");
 	}
 }
