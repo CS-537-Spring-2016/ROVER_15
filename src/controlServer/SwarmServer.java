@@ -30,6 +30,7 @@ import enums.RoverName;
 import enums.RoverToolType;
 import enums.Science;
 import enums.Terrain;
+import supportTools.SwarmMapInit;
 
 
 /**
@@ -44,11 +45,15 @@ public class SwarmServer {
      * The port that the server listens on.
      */
     private static final int PORT = 9537; // because ... class number
+    
+    private static SwarmMapInit mapInit = new SwarmMapInit();
+    
+    private static final String mapFileName = "largeMap100x100_map1.txt";
 
     // TODO - these should actually be loaded from a file along with the map
-    private static int mapWidth = 30;
-    private static int mapHeight = 30;
-    private static PlanetMap planetMap = new PlanetMap(mapWidth, mapHeight); 
+    private static int mapWidth = 0;
+    private static int mapHeight = 0;
+    private static PlanetMap planetMap = null; // = new PlanetMap(mapWidth, mapHeight); 
     private static RoverLocations roverLocations = new RoverLocations();
     private static ScienceLocations scienceLocations = new ScienceLocations();
     
@@ -81,10 +86,20 @@ public class SwarmServer {
     public static void main(String[] args) throws Exception {
         System.out.println("The Swarm server is running.");
         ServerSocket listener = new ServerSocket(PORT);
-       
+        
+        
+        mapInit.parseInputFromDisplayTextFile(mapFileName);
+        
+        mapHeight = mapInit.getMapHeight();
+        mapWidth = mapInit.getMapWidth();
+        planetMap = mapInit.getPlanetMap();
+        roverLocations = mapInit.getRoverLocations();
+        scienceLocations = mapInit.getScienceLocations();
+        
 //		mainPanel = new GUIdisplay();
 //		myWorker = new MyGUIWorker(mainPanel);
-		
+        
+       
 		mainPanel = new GUIdisplay2(mapWidth, mapHeight);
 		myWorker = new MyGUIWorker2(mainPanel);
 		
