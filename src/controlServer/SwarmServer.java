@@ -719,6 +719,6 @@ public class SwarmServer {
 		//myWorker.displayRovers(roverLocations);
 		//myWorker.displayActivity(roverLocations, scienceLocations);
 		//myWorker.displayFullMap(roverLocations, scienceLocations, planetMap);
-		myWorker2.displayFullMap(roverLocations, scienceLocations, planetMap);
+		myWorker2.displayFullMap(roverLocations.clone(), scienceLocations, planetMap);
 	}
 }

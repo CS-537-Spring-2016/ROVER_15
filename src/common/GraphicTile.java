@@ -18,6 +18,7 @@ public class GraphicTile {
 	boolean hasTerrain = false;
 	boolean hasScience = false;
 	boolean hasString = false;
+	boolean hasRover = false;
 	
 	
 	public GraphicTile(int x, int y){ 
@@ -42,11 +43,11 @@ public class GraphicTile {
 			g.setColor(colorScience);
 			g.fillOval(x*TILE_SIZE +11, y*TILE_SIZE +11 , 7, 7);
 		}			
-		if(hasString){
+		if(hasRover){
 			g.setColor(colorString);
 			Font font = new Font("Arial", Font.BOLD, 12);
 			g.setFont(font);
-			g.drawString(roverName , 4 *TILE_SIZE +2, 9 *TILE_SIZE -10);
+			g.drawString(roverName , x *TILE_SIZE +2, y *TILE_SIZE +10);
 		}			
 	}
 	
@@ -109,4 +110,10 @@ public class GraphicTile {
 		this.hasScience = hasScience;
 	}
 	
+	public boolean getHasRover() {
+		return this.hasRover;
+	}
+	public void setHasRover(boolean hrover) {
+		this.hasRover = hrover;
+	}
 }

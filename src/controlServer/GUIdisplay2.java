@@ -29,6 +29,8 @@ public class GUIdisplay2 extends JPanel implements MyGUIAppendable2 {
 	private int pixelHeight;
 	private List<Point> fillCells;
 	private List<GraphicTile> graphicTiles;
+	
+	private Color EXTRA_LIGHT_GREY = new Color(220, 220, 220);
 
 	public GUIdisplay2() {
 		//area = new JTextArea(55, 110);  //height x width
@@ -102,8 +104,9 @@ public class GUIdisplay2 extends JPanel implements MyGUIAppendable2 {
         	graphicTile.drawTile(g);
         }
         
-        g.setColor(Color.LIGHT_GRAY);
-        // This draws the rectangle start at point (10,10) 
+        
+        g.setColor(EXTRA_LIGHT_GREY);
+        
         g.drawRect(0, 0, pixelWidth, pixelHeight);
         for (int i = 0; i <= pixelWidth; i += TILE_SIZE) {
             g.drawLine(i, 0, i, pixelHeight);
@@ -177,57 +180,56 @@ class MyGUIWorker2 extends SwingWorker<Void, String> {
 		
 		ArrayList<GraphicTile> graphicTiles = new ArrayList<GraphicTile>();
 		
-		graphicTiles.add(new GraphicTile(5, 5, Color.ORANGE, Color.GREEN));
-		graphicTiles.add(new GraphicTile(7, 3));
-		graphicTiles.add(new GraphicTile(4, 8));
-		
-		myAppendable.drawThisGraphicTileArray(graphicTiles);
+//		graphicTiles.add(new GraphicTile(5, 5, Color.ORANGE, Color.GREEN));
+//		graphicTiles.add(new GraphicTile(7, 3));
+//		graphicTiles.add(new GraphicTile(4, 8));
+//		
+//		myAppendable.drawThisGraphicTileArray(graphicTiles);
 		
 
 		
 		//StringBuilder roverPrint = new StringBuilder();
 		for(int j=0; j<mHeight; j++){
 			for(int i=0; i<mWidth; i++){
-				//scan through the map - left to right, top to bottom
-				Coord tcor = new Coord(i, j);
-				GraphicTile gtile = new GraphicTile(tcor.xpos, tcor.ypos);
-				// first check for a rover and add to map if found
-				if(roverLoc.containsCoord(tcor)){
-					String rNum = roverLoc.getName(tcor).toString();
-					//roverPrint.append("|" + rNum.substring(6));
-					//make a tile with rover number
-					gtile.setRoverName(rNum);
 				
-				// then check if there is a terrain feature (if not SOIL then display terrain)
-				} else if(planetMap.getTile(tcor).getTerrain() != Terrain.SOIL){
-					//roverPrint.append("|");
-					//roverPrint.append(planetMap.getTile(tcor).getTerrain().getTerString());
+					//scan through the map - left to right, top to bottom
+					Coord tcor = new Coord(i, j);
+					GraphicTile gtile = new GraphicTile(tcor.xpos, tcor.ypos);
 					
-					//set terrain color on tile accordingly
-					//if terrain == R set color Brown and terrain == true
+					// first check for a rover and add to graphicTile if found
+					if(roverLoc.containsCoord(tcor)){
+						String rNum = roverLoc.getName(tcor).toString();
+						//roverPrint.append("|" + rNum.substring(6));
+						//make a tile with rover number
+						
+						gtile.setRoverName(rNum.substring(6));
+						gtile.setHasRover(true);
+						System.out.println("GUIdisplay2: roverName " + gtile.getRoverName());
 					
-					gtile.setColorTerrain(Color.GREEN);
-					gtile.setHasTerrain(true);
+					// then check if there is a terrain feature (if not SOIL then add terrain to graphicTile )
+					} 
 					
-//					if(sciloc.checkLocation(tcor)) {
-//						roverPrint.append(sciloc.scanLocation(tcor).getSciString());
-//					} else {
-//						roverPrint.append("_");
-//					}
+					if(planetMap.getTile(tcor).getTerrain() != Terrain.SOIL){
+						//roverPrint.append("|");
+						//roverPrint.append(planetMap.getTile(tcor).getTerrain().getTerString());
+						
+						//set terrain color on tile accordingly
+						//if terrain == R set color Brown and terrain == true
+						
+						gtile.setColorTerrain(Color.GREEN);
+						gtile.setHasTerrain(true);
+						
+					
+					} 
+
+					if(sciloc.checkLocation(tcor)) {
+	//					roverPrint.append(sciloc.scanLocation(tcor).getSciString());
+						gtile.setHasScience(true);
+						
+					} 
+
+					graphicTiles.add(gtile);
 				
-				} else if(planetMap.getTile(tcor).getTerrain() == Terrain.SOIL){
-//					roverPrint.append("|_");
-//					if(sciloc.checkLocation(tcor)) {
-//						roverPrint.append(sciloc.scanLocation(tcor).getSciString());
-//					} else {
-//						roverPrint.append("_");
-//					}
-					
-				} else {
-					
-					//roverPrint.append("|__");
-				}
-				graphicTiles.add(gtile);
 			}
 			
 			//roverPrint.append("|\n");
