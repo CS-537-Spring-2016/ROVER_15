@@ -35,7 +35,9 @@ public class ScanMap {
 					//terrain and science
 				} else if(!(scanArray[i][j].getTerrain().toString().equals("SOIL"))
 						&& !(scanArray[i][j].getScience().toString().equals("NONE"))){
-					System.out.print(scanArray[i][j].getTerrain().toString().substring(1) + scanArray[i][j].getScience().getSciString());
+					// both terrain and science
+					
+					System.out.print(scanArray[i][j].getTerrain().toString().substring(0,1) + scanArray[i][j].getScience().getSciString());
 					//just terrain
 				} else if(!(scanArray[i][j].getTerrain().toString().equals("SOIL"))){
 					System.out.print(scanArray[i][j].getTerrain().toString().substring(0,1) + " ");

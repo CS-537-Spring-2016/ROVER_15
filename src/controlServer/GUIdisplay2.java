@@ -72,6 +72,7 @@ public class GUIdisplay2 extends JPanel implements MyGUIAppendable2 {
 		repaint();
 	}
 	
+	/*//example test code
 	public void fillCell(int x, int y) {
         fillCells.add(new Point(x, y));
         repaint();
@@ -84,11 +85,12 @@ public class GUIdisplay2 extends JPanel implements MyGUIAppendable2 {
 		fillCell(1,2);
 	}
 	
-	private void fillGraphicTile(){
+	//example test code
+	private void fillGraphicTile(){ 
 		graphicTiles.add(new GraphicTile(5, 5, Color.ORANGE, Color.GREEN));
 		graphicTiles.add(new GraphicTile(7, 3));
 		graphicTiles.add(new GraphicTile(4, 8));
-	}
+	} */
 	
 	
 	@Override
@@ -96,7 +98,7 @@ public class GUIdisplay2 extends JPanel implements MyGUIAppendable2 {
 		// get the idea from: 
 		// http://stackoverflow.com/questions/15870608/creating-a-draw-rectangle-filled-with-black-color-function-in-java-for-a-grid
 		
-		// Draw all the grid by 10 pixel 
+		 
         super.paintComponent(g);
         
         
@@ -107,6 +109,7 @@ public class GUIdisplay2 extends JPanel implements MyGUIAppendable2 {
         
         g.setColor(EXTRA_LIGHT_GREY);
         
+        // Draw all the grid squares TILE_SIZE x TILE_SIZE pixels
         g.drawRect(0, 0, pixelWidth, pixelHeight);
         for (int i = 0; i <= pixelWidth; i += TILE_SIZE) {
             g.drawLine(i, 0, i, pixelHeight);
@@ -133,7 +136,7 @@ public class GUIdisplay2 extends JPanel implements MyGUIAppendable2 {
 		JFrame frame = new JFrame("GUIdisplay");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setContentPane(mainPanel);
-		frame.setSize(1000, 1000);
+		frame.setSize(1000, 1000); 			//is this used?
 		frame.pack();
 		frame.setLocationByPlatform(true);
 		frame.setVisible(true);
@@ -203,8 +206,7 @@ class MyGUIWorker2 extends SwingWorker<Void, String> {
 						//make a tile with rover number
 						
 						gtile.setRoverName(rNum.substring(6));
-						gtile.setHasRover(true);
-						System.out.println("GUIdisplay2: roverName " + gtile.getRoverName());
+		
 					
 					// then check if there is a terrain feature (if not SOIL then add terrain to graphicTile )
 					} 
@@ -216,15 +218,14 @@ class MyGUIWorker2 extends SwingWorker<Void, String> {
 						//set terrain color on tile accordingly
 						//if terrain == R set color Brown and terrain == true
 						
-						gtile.setColorTerrain(Color.GREEN);
-						gtile.setHasTerrain(true);
-						
+						//gtile.setColorTerrain(Color.GREEN);
+						gtile.setTerrain(planetMap.getTile(tcor).getTerrain());	
 					
 					} 
 
 					if(sciloc.checkLocation(tcor)) {
 	//					roverPrint.append(sciloc.scanLocation(tcor).getSciString());
-						gtile.setHasScience(true);
+						gtile.setScience(sciloc.scanLocation(tcor));
 						
 					} 
 
