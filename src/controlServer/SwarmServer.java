@@ -48,7 +48,7 @@ public class SwarmServer {
     
     private static SwarmMapInit mapInit = new SwarmMapInit();
     
-    private static final String mapFileName = "largeMap100x100_map1.txt";
+    private static final String mapFileName = "largeMap50x50map2.txt";
 
     // TODO - these should actually be loaded from a file along with the map
     private static int mapWidth = 0;
@@ -57,11 +57,11 @@ public class SwarmServer {
     private static RoverLocations roverLocations = new RoverLocations();
     private static ScienceLocations scienceLocations = new ScienceLocations();
     
-//  static GUIdisplay mainPanel;
-//	static MyGUIWorker myWorker;
+	static GUIdisplay mainPanel;
+	static MyGUIWorker myWorker;
 	
-    static GUIdisplay2 mainPanel;
-	static MyGUIWorker2 myWorker;
+    static GUIdisplay2 mainPanel2;
+	static MyGUIWorker2 myWorker2;
     
 	// These are the velocity or speed values for the different drive systems
 	// Changes these as necessary for good simulation balance
@@ -96,18 +96,25 @@ public class SwarmServer {
         roverLocations = mapInit.getRoverLocations();
         scienceLocations = mapInit.getScienceLocations();
         
-//		mainPanel = new GUIdisplay();
-//		myWorker = new MyGUIWorker(mainPanel);
+		mainPanel = new GUIdisplay(mapWidth, mapHeight);
+		myWorker = new MyGUIWorker(mainPanel);
         
        
-		mainPanel = new GUIdisplay2(mapWidth, mapHeight);
-		myWorker = new MyGUIWorker2(mainPanel);
+		mainPanel2 = new GUIdisplay2(mapWidth, mapHeight);
+		myWorker2 = new MyGUIWorker2(mainPanel2);
 		
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				//TODO - send a copy of the planetMap to GUI to use as background image
 				// currently sending it when calling the updateGUIDisplay() method
-				GUIdisplay2.createAndShowGui(myWorker, mainPanel);
+				GUIdisplay.createAndShowGui(myWorker, mainPanel);
+				//GUIdisplay2.createAndShowGui(myWorker2, mainPanel2);
+				try {
+					updateGUIDisplay();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		});
 		       
@@ -712,5 +719,6 @@ public class SwarmServer {
 		//myWorker.displayRovers(roverLocations);
 		//myWorker.displayActivity(roverLocations, scienceLocations);
 		myWorker.displayFullMap(roverLocations, scienceLocations, planetMap);
+		//myWorker2.displayFullMap(roverLocations, scienceLocations, planetMap);
 	}
 }
