@@ -107,8 +107,8 @@ public class SwarmServer {
 			public void run() {
 				//TODO - send a copy of the planetMap to GUI to use as background image
 				// currently sending it when calling the updateGUIDisplay() method
-				GUIdisplay.createAndShowGui(myWorker, mainPanel);
-				//GUIdisplay2.createAndShowGui(myWorker2, mainPanel2);
+				//GUIdisplay.createAndShowGui(myWorker, mainPanel);
+				GUIdisplay2.createAndShowGui(myWorker2, mainPanel2);
 				try {
 					updateGUIDisplay();
 				} catch (Exception e) {
@@ -718,7 +718,7 @@ public class SwarmServer {
 	static void updateGUIDisplay() throws Exception{
 		//myWorker.displayRovers(roverLocations);
 		//myWorker.displayActivity(roverLocations, scienceLocations);
-		myWorker.displayFullMap(roverLocations, scienceLocations, planetMap);
-		//myWorker2.displayFullMap(roverLocations, scienceLocations, planetMap);
+		//myWorker.displayFullMap(roverLocations, scienceLocations, planetMap);
+		myWorker2.displayFullMap(roverLocations, scienceLocations, planetMap);
 	}
 }

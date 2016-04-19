@@ -9,10 +9,12 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
 
+import common.Coord;
 import common.GraphicTile;
 import common.PlanetMap;
 import common.RoverLocations;
 import common.ScienceLocations;
+import enums.Terrain;
 
 // Thanks to this posting for the seed this was constructed from:
 // http://stackoverflow.com/questions/30204521/thread-output-to-gui-text-field
@@ -45,13 +47,6 @@ public class GUIdisplay2 extends JPanel implements MyGUIAppendable2 {
 		this.pixelHeight = (this.height*TILE_SIZE);
 		fillCells = new ArrayList<>();
 		graphicTiles = new ArrayList<>();
-		
-		//area = new JTextArea(height +5, (width * 2)+2);
-		//this.width = width ;
-		//this.height = height;
-		//JScrollPane scrollPane = new JScrollPane(area);
-		//scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-		//add(scrollPane);
 	}
 
 	@Override
@@ -67,6 +62,12 @@ public class GUIdisplay2 extends JPanel implements MyGUIAppendable2 {
 	@Override
 	public void setText(String text) {
 		area.setText(text);
+	}
+	
+	@Override
+	public void drawThisGraphicTileArray(ArrayList<GraphicTile> gtarraylist){
+		graphicTiles = gtarraylist;
+		repaint();
 	}
 	
 	public void fillCell(int x, int y) {
@@ -97,24 +98,11 @@ public class GUIdisplay2 extends JPanel implements MyGUIAppendable2 {
         super.paintComponent(g);
         
         
-//        fillRover(); // only for testing purpose 
-//        
-//        // will modify in the future. 
-//        for (Point fillCell : fillCells) {
-//            int cellX = (fillCell.x * 10);
-//            int cellY = (fillCell.y * 10);
-//            g.setColor(Color.RED);
-//            //g.fillRect(cellX, cellY, 10, 10);
-//            g.fillOval(cellX, cellY, 10, 10);
-//        }
-        
-        fillGraphicTile();
-        
         for(GraphicTile graphicTile : graphicTiles){
         	graphicTile.drawTile(g);
         }
         
-        g.setColor(Color.BLACK);
+        g.setColor(Color.LIGHT_GRAY);
         // This draws the rectangle start at point (10,10) 
         g.drawRect(0, 0, pixelWidth, pixelHeight);
         for (int i = 0; i <= pixelWidth; i += TILE_SIZE) {
@@ -125,20 +113,7 @@ public class GUIdisplay2 extends JPanel implements MyGUIAppendable2 {
             g.drawLine(0, i, pixelWidth, i);
         }
         
-        /*for (Point fillCell : fillCells) {
-            int cellX = 10 + (fillCell.x * 10);
-            int cellY = 10 + (fillCell.y * 10);
-            g.setColor(Color.RED);
-            g.fillRect(cellX, cellY, 10, 10);
-        }
-        g.setColor(Color.BLACK);
-        g.drawRect(10, 10, 800, 500);
-        for (int i = 10; i <= 800; i += 10) {
-            g.drawLine(i, 10, i, 510);
-        }
-        for (int i = 10; i <= 500; i += 10) {
-            g.drawLine(10, i, 810, i);
-        }*/
+
     }
 	
 	@Override
@@ -195,67 +170,71 @@ class MyGUIWorker2 extends SwingWorker<Void, String> {
 		myAppendable.clearDisplay();
 	}
 	
-//	public void displayRovers(RoverLocations roverLoc){
-//		myAppendable.clearDisplay();
-//		String[] roverPrint = new String[(50 * 50)];
-//		for(int j=0; j<50; j++){
-//			for(int i=0; i<50; i++){
-//				Coord tcor = new Coord(i, j);
-//				if(roverLoc.containsCoord(tcor)){
-//
-//					String rNum = roverLoc.getName(tcor).toString();
-//
-//					myAppendable.append(rNum.substring(6));
-//				} else {
-//					myAppendable.append("  ");
-//				}
-//			}
-//			myAppendable.append("\n");
-//		}
-//	}
-	
+
 	public void displayGraphicMap(RoverLocations roverLoc, ScienceLocations sciloc, PlanetMap planetMap){
 		int mWidth = planetMap.getWidth();
 		int mHeight = planetMap.getHeight();
-		/*Graphics g = new Graphics ();
+		
+		ArrayList<GraphicTile> graphicTiles = new ArrayList<GraphicTile>();
+		
+		graphicTiles.add(new GraphicTile(5, 5, Color.ORANGE, Color.GREEN));
+		graphicTiles.add(new GraphicTile(7, 3));
+		graphicTiles.add(new GraphicTile(4, 8));
+		
+		myAppendable.drawThisGraphicTileArray(graphicTiles);
+		
+
 		
 		//StringBuilder roverPrint = new StringBuilder();
 		for(int j=0; j<mHeight; j++){
 			for(int i=0; i<mWidth; i++){
 				//scan through the map - left to right, top to bottom
 				Coord tcor = new Coord(i, j);
+				GraphicTile gtile = new GraphicTile(tcor.xpos, tcor.ypos);
 				// first check for a rover and add to map if found
 				if(roverLoc.containsCoord(tcor)){
 					String rNum = roverLoc.getName(tcor).toString();
-					roverPrint.append("|" + rNum.substring(6));
+					//roverPrint.append("|" + rNum.substring(6));
+					//make a tile with rover number
+					gtile.setRoverName(rNum);
 				
 				// then check if there is a terrain feature (if not SOIL then display terrain)
 				} else if(planetMap.getTile(tcor).getTerrain() != Terrain.SOIL){
-					roverPrint.append("|");
-					roverPrint.append(planetMap.getTile(tcor).getTerrain().getTerString());
-					if(sciloc.checkLocation(tcor)) {
-						roverPrint.append(sciloc.scanLocation(tcor).getSciString());
-					} else {
-						roverPrint.append("_");
-					}
+					//roverPrint.append("|");
+					//roverPrint.append(planetMap.getTile(tcor).getTerrain().getTerString());
+					
+					//set terrain color on tile accordingly
+					//if terrain == R set color Brown and terrain == true
+					
+					gtile.setColorTerrain(Color.GREEN);
+					gtile.setHasTerrain(true);
+					
+//					if(sciloc.checkLocation(tcor)) {
+//						roverPrint.append(sciloc.scanLocation(tcor).getSciString());
+//					} else {
+//						roverPrint.append("_");
+//					}
 				
 				} else if(planetMap.getTile(tcor).getTerrain() == Terrain.SOIL){
-					roverPrint.append("|_");
-					if(sciloc.checkLocation(tcor)) {
-						roverPrint.append(sciloc.scanLocation(tcor).getSciString());
-					} else {
-						roverPrint.append("_");
-					}
+//					roverPrint.append("|_");
+//					if(sciloc.checkLocation(tcor)) {
+//						roverPrint.append(sciloc.scanLocation(tcor).getSciString());
+//					} else {
+//						roverPrint.append("_");
+//					}
 					
 				} else {
 					
-					roverPrint.append("|__");
+					//roverPrint.append("|__");
 				}
+				graphicTiles.add(gtile);
 			}
-			roverPrint.append("|\n");
+			
+			//roverPrint.append("|\n");
 		}
-		myAppendable.clearDisplay();
-		myAppendable.setText(roverPrint.toString());*/
+		//myAppendable.clearDisplay();
+		//myAppendable.setText(roverPrint.toString());
+		myAppendable.drawThisGraphicTileArray(graphicTiles);
 	}
 	
 	public void displayFullMap(RoverLocations roverLoc, ScienceLocations sciloc, PlanetMap planetMap){
@@ -348,7 +327,25 @@ class MyGUIWorker2 extends SwingWorker<Void, String> {
 }
 
 interface MyGUIAppendable2 {
+	public void drawThisGraphicTileArray(ArrayList<GraphicTile> gtarraylist);
 	public void append(String text);
 	public void setText(String text);
 	public void clearDisplay();
 }
+
+
+
+/*for (Point fillCell : fillCells) {
+int cellX = 10 + (fillCell.x * 10);
+int cellY = 10 + (fillCell.y * 10);
+g.setColor(Color.RED);
+g.fillRect(cellX, cellY, 10, 10);
+}
+g.setColor(Color.BLACK);
+g.drawRect(10, 10, 800, 500);
+for (int i = 10; i <= 800; i += 10) {
+g.drawLine(i, 10, i, 510);
+}
+for (int i = 10; i <= 500; i += 10) {
+g.drawLine(10, i, 810, i);
+}*/

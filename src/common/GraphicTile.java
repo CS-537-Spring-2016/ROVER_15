@@ -10,14 +10,15 @@ public class GraphicTile {
 	int x; //Location values
 	int y;
 	
+	String roverName = "";
+	
 	Color colorTerrain = Color.RED;
 	Color colorScience = Color.BLUE;
 	Color colorString = Color.BLACK;
-	boolean hasTerrain = true;
-	boolean hasScience = true;
-	boolean hasString = true;
+	boolean hasTerrain = false;
+	boolean hasScience = false;
+	boolean hasString = false;
 	
-	Graphics graphic;
 	
 	public GraphicTile(int x, int y){ 
 		
@@ -35,7 +36,7 @@ public class GraphicTile {
 	public void drawTile(Graphics g){	
 		if(hasTerrain){
 			g.setColor(colorTerrain);
-			g.  fillRect(x *TILE_SIZE, y *TILE_SIZE, TILE_SIZE, TILE_SIZE);
+			g.fillRect(x *TILE_SIZE, y *TILE_SIZE, TILE_SIZE, TILE_SIZE);
 		}
 		if(hasScience){
 			g.setColor(colorScience);
@@ -45,7 +46,7 @@ public class GraphicTile {
 			g.setColor(colorString);
 			Font font = new Font("Arial", Font.BOLD, 12);
 			g.setFont(font);
-			g.drawString("15" , 4 *TILE_SIZE +2, 9 *TILE_SIZE -10);
+			g.drawString(roverName , 4 *TILE_SIZE +2, 9 *TILE_SIZE -10);
 		}			
 	}
 	
@@ -67,11 +68,45 @@ public class GraphicTile {
 //	public void setColor(Color color) {
 //		this.color = color;
 //	}
-	public Graphics getGraphic() {
-		return graphic;
+
+	public String getRoverName() {
+		return roverName;
 	}
-	public void setGraphic(Graphics graphic) {
-		this.graphic = graphic;
+
+	public void setRoverName(String roverName) {
+		this.roverName = roverName;
+	}
+
+	public Color getColorTerrain() {
+		return colorTerrain;
+	}
+
+	public Color getColorScience() {
+		return colorScience;
+	}
+
+	public void setColorTerrain(Color colorTerrain) {
+		this.colorTerrain = colorTerrain;
+	}
+
+	public void setColorScience(Color colorScience) {
+		this.colorScience = colorScience;
+	}
+
+	public boolean isHasTerrain() {
+		return hasTerrain;
+	}
+
+	public boolean isHasScience() {
+		return hasScience;
+	}
+
+	public void setHasTerrain(boolean hasTerrain) {
+		this.hasTerrain = hasTerrain;
+	}
+
+	public void setHasScience(boolean hasScience) {
+		this.hasScience = hasScience;
 	}
 	
 }
