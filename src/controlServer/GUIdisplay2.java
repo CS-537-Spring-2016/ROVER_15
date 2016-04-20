@@ -65,14 +65,15 @@ public class GUIdisplay2 extends JPanel implements MyGUIAppendable2 {
 		// create a 1 seconds delay
 		timer = new Timer(1000, new ActionListener() {
 			// private long time = 60 * 1000; //60 seconds
-			private long time = 600 * 1000; // 10 mintes
+			private long time = 600 * 1000; // 10 minutes
 
 			public void actionPerformed(ActionEvent e) {
 				if (time >= 0) {
 					long s = ((time / 1000) % 60);
 					long m = (((time / 1000) / 60) % 60);
 					long h = ((((time / 1000) / 60) / 60) % 60);
-					countdownClock.setText(h + " h " + m + " m " + s + " s");
+					//countdownClock.setText(h + " h " + m + " m " + s + " s");
+					countdownClock.setText( "Time remaining: " + m + " minutes " + s + " seconds");
 					time -= 1000;
 				}
 			}
