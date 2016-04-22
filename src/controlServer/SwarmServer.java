@@ -242,7 +242,8 @@ public class SwarmServer {
                 	 * ***************** START_LOC *******************
                 	 */
                     // gets the current position of the rover	
-                    } else if (input.startsWith("START_LOC")){            
+                    } else if (input.startsWith("START_LOC")){  
+                    	System.out.println("SWARM: ------ START_LOC ------"); //debug test input parsing
                     	// does not need to synchronize-lock scienceLocations because not changing any values
                     	Coord startPos = planetMap.getStartPosition();
                     	out.println("START_LOC " + startPos.xpos + " " + startPos.ypos);
@@ -258,7 +259,7 @@ public class SwarmServer {
                     	//System.out.println("SWARM: ------ TARGET_LOC ------"); //debug test input parsing
                     	// does not need to synchronize-lock scienceLocations because not changing any values
                     	Coord targetPos = planetMap.getTargetPosition();
-                    	out.println("START_LOC " + targetPos.xpos + " " + targetPos.ypos);
+                    	out.println("TARGET_LOC " + targetPos.xpos + " " + targetPos.ypos);
                             	
                             	
                     	

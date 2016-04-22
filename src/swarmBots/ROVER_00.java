@@ -79,8 +79,49 @@ public class ROVER_00 {
 	
 			
 			// ********* Rover logic setup *********
-			// int cnt=0;
+			
 			String line = "";
+			Coord rovergroupStartPosition = null;
+			Coord targetLocation = null;
+			
+			/**
+			 *  Get initial values that won't change
+			 */
+			// **** get equipment listing ****			
+			ArrayList<String> equipment = new ArrayList<String>();
+			equipment = getEquipment();
+			System.out.println(rovername + " equipment list results " + equipment + "\n");
+			
+			
+			// **** Request START_LOC Location from SwarmServer ****
+			out.println("START_LOC");
+			line = in.readLine();
+            if (line == null) {
+            	System.out.println(rovername + " check connection to server");
+            	line = "";
+            }
+			if (line.startsWith("START_LOC")) {
+				rovergroupStartPosition = extractLocationFromString(line);
+			}
+			System.out.println(rovername + " START_LOC " + rovergroupStartPosition);
+			
+			
+			// **** Request TARGET_LOC Location from SwarmServer ****
+			out.println("TARGET_LOC");
+			line = in.readLine();
+            if (line == null) {
+            	System.out.println(rovername + " check connection to server");
+            	line = "";
+            }
+			if (line.startsWith("TARGET_LOC")) {
+				targetLocation = extractLocationFromString(line);
+			}
+			System.out.println(rovername + " TARGET_LOC " + targetLocation);
+			
+			
+
+			
+	
 	
 			boolean goingSouth = false;
 			boolean stuck = false; // just means it did not change locations between requests,
@@ -108,24 +149,21 @@ public class ROVER_00 {
 				out.println("LOC");
 				line = in.readLine();
 	            if (line == null) {
-	            	System.out.println("ROVER_00 check connection to server");
+	            	System.out.println(rovername + " check connection to server");
 	            	line = "";
 	            }
 				if (line.startsWith("LOC")) {
 					// loc = line.substring(4);
-					currentLoc = extractLOC(line);
+					currentLoc = extractLocationFromString(line);
+					
 				}
-				System.out.println("ROVER_00 currentLoc at start: " + currentLoc);
+				System.out.println(rovername + " currentLoc at start: " + currentLoc);
 				
 				// after getting location set previous equal current to be able to check for stuckness and blocked later
 				previousLoc = currentLoc;		
 				
 				
-				// **** get equipment listing ****			
-				ArrayList<String> equipment = new ArrayList<String>();
-				equipment = getEquipment();
-				//System.out.println("ROVER_00 equipment list results drive " + equipment.get(0));
-				System.out.println("ROVER_00 equipment list results " + equipment + "\n");
+
 				
 		
 	
@@ -137,6 +175,10 @@ public class ROVER_00 {
 				scanMap.debugPrintMap();
 				
 		
+				
+				
+
+				
 	
 				
 				// ***** MOVING *****
@@ -196,7 +238,8 @@ public class ROVER_00 {
 					line = "";
 				}
 				if (line.startsWith("LOC")) {
-					currentLoc = extractLOC(line);
+					currentLoc = extractLocationFromString(line);
+					
 				}
 	
 	
@@ -236,7 +279,7 @@ public class ROVER_00 {
 	private void clearReadLineBuffer() throws IOException{
 		while(in.ready()){
 			//System.out.println("ROVER_00 clearing readLine()");
-			String garbage = in.readLine();	
+			in.readLine();	
 		}
 	}
 	
@@ -323,10 +366,12 @@ public class ROVER_00 {
 	}
 	
 
-	// this takes the LOC response string, parses out the x and x values and
-	// returns a Coord object
-	public static Coord extractLOC(String sStr) {
-		sStr = sStr.substring(4);
+	// this takes the server response string, parses out the x and x values and
+	// returns a Coord object	
+	public static Coord extractLocationFromString(String sStr) {
+		int indexOf;
+		indexOf = sStr.indexOf(" ");
+		sStr = sStr.substring(indexOf +1);
 		if (sStr.lastIndexOf(" ") != -1) {
 			String xStr = sStr.substring(0, sStr.lastIndexOf(" "));
 			//System.out.println("extracted xStr " + xStr);
@@ -337,7 +382,6 @@ public class ROVER_00 {
 		}
 		return null;
 	}
-	
 	
 
 	/**
