@@ -2,16 +2,21 @@ package common;
 
 public class PlanetMap {
 	private MapTile[][] planetMap;
+	// width is number of columns is xloc, height is number of rows is yloc
 	private int mapWidth;
 	private int mapHeight;
+	private Coord startPosCoord;
+	private Coord targetPosCoord;
 	
 	public PlanetMap(){
 		this.mapHeight = 0;
 		this.mapWidth = 0;
 		this.planetMap = null;
+		this.startPosCoord = null;
+		this.targetPosCoord = null;
 	}
 	
-	// width is number of columns is xloc, height is number of rows is yloc
+	
 	public PlanetMap(int width, int height){
 		this.mapHeight = height;
 		this.mapWidth = width;
@@ -21,9 +26,11 @@ public class PlanetMap {
 				this.planetMap[i][j] = new MapTile();
 			}
 		}
+		this.startPosCoord = new Coord(0, 0);
+		this.targetPosCoord = new Coord(0, 0);
 	}
 	
-	public PlanetMap(int width, int height, String fname){
+	public PlanetMap(int width, int height, Coord startPos, Coord targetPos){
 		this.mapHeight = height;
 		this.mapWidth = width;
 		this.planetMap = new MapTile[width][height];
@@ -32,16 +39,20 @@ public class PlanetMap {
 				this.planetMap[i][j] = new MapTile();
 			}
 		}
+		this.startPosCoord = startPos;
+		this.targetPosCoord = targetPos;
 	}
 	
 	public PlanetMap(String filename){
-
+		// TODO add ability to instantiate from JSON or binary file
 	}
 	
 	public PlanetMap(PlanetMap planetMapIn) {
-		planetMap = planetMapIn.planetMap;
-		mapWidth = planetMapIn.mapWidth;
-		mapHeight = planetMapIn.mapHeight;
+		this.planetMap = planetMapIn.planetMap.clone();
+		this.mapWidth = planetMapIn.mapWidth;
+		this.mapHeight = planetMapIn.mapHeight;
+		this.startPosCoord = planetMapIn.startPosCoord;
+		this.targetPosCoord = planetMapIn.targetPosCoord;
 	}
 
 	public void setTile(MapTile tile, int xloc, int yloc){
@@ -56,7 +67,7 @@ public class PlanetMap {
 		return this.planetMap[xloc][yloc];
 	}
 	
-	// assumes edge size is an odd number
+	// Generates and returns a local scanMap to the rover; assumes edge size is an odd number
 	public ScanMap getScanMap(Coord coord, int edgeSize, RoverLocations rloc, ScienceLocations sciloc){
 		int startx = coord.xpos - (edgeSize -1)/2;
 		int starty = coord.ypos - (edgeSize -1)/2;
@@ -65,15 +76,16 @@ public class PlanetMap {
 		
 		for(int j= 0; j< edgeSize; j++){
 			for(int i= 0; i< edgeSize; i++){
+				// Checks if location value is off the edge of the planetMap
 				if((i + startx) < 0 || (i + startx) >= mapWidth || (j + starty) < 0 || (j + starty) >= mapHeight){
 					aTile = new MapTile(0); // makes a MapTile with terrain = NONE
-				} else {
-					
-					// It is important to make a copy of the map tile to prevent
+				} else {					
+					// It is important to instantiate a new map tile to prevent
 					// passing the tile by reference and corrupting the original planetMap
 					aTile = planetMap[i + startx][j + starty].getCopyOfMapTile();
 				}
 				Coord tempCoord = new Coord(i + startx, j + starty);
+				
 				// check and add rover to tile
 				if(rloc.containsCoord(tempCoord)){
 					aTile.setHasRoverTrue();
@@ -83,26 +95,32 @@ public class PlanetMap {
 				if(sciloc.checkLocation(tempCoord)){
 					aTile.setSciecne(sciloc.scanLocation(tempCoord));
 				}
-				
-				//System.out.println("PlanetMap: getScan index: " + i + " " + j);
 				tMap[i][j] = aTile;
 			}	
 		}
-		
-		//System.out.println("PLANET_MAP: ---- print roverLoc ----");
-			//rloc.printRovers();
-			//System.out.println("PLANET_MAP: ^^^^^ print roverLoc ^^^^");	
 		return new ScanMap(tMap, edgeSize, coord);
 	}
 	
 	public int getWidth(){
-		return mapWidth;
+		return this.mapWidth;
 	}
 	
 	public int getHeight(){
-		return mapHeight;
+		return this.mapHeight;
 	}
 	
+	public Coord getStartPosition(){
+		return this.startPosCoord;
+	}
+	
+	public Coord getTargetPosition(){
+		return this.targetPosCoord;
+	}
+	
+	
+	/*
+	 * These are only used for testing and development
+	 */
 	public void loadExampleTestPlanetMapTerrain(){
 		// temporary use for creating planet terrain for testing
 		

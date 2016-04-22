@@ -66,6 +66,12 @@ public class ScienceLocations {
 			scienceHash.put(sloc, sci);
 		}
 		
+		
+		
+		/*
+		 * These are only used for testing and development
+		 */
+		
 		public void loadExampleTestScienceLocations(){
 			// put some sample science in the world
 			scienceHash.put(new Coord(20,14), Science.RADIOACTIVE);

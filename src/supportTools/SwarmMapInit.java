@@ -32,6 +32,8 @@ public class SwarmMapInit {
 	private PlanetMap planetMap;
 	private RoverLocations roverLocations;
 	private ScienceLocations scienceLocations;
+	private Coord startPosCoord = null;
+	private Coord targetPosCoord = null;
 
 	public SwarmMapInit(int notUsed) { // for testing purposes
 		this.mapWidth = 5;
@@ -46,6 +48,8 @@ public class SwarmMapInit {
 		this.scienceLocations.loadExampleTestScienceLocations();
 
 		this.mapName = "";
+		this.startPosCoord = new Coord(1,1);
+		this.targetPosCoord = new Coord(2,2);
 	}
 
 	public SwarmMapInit() {
@@ -65,6 +69,8 @@ public class SwarmMapInit {
 		this.roverLocations = roverLoc;
 		this.scienceLocations = scienceLoc;
 		this.mapName = name;
+		this.startPosCoord = planetMapIn.getStartPosition();
+		this.targetPosCoord = planetMapIn.getTargetPosition();
 	}
 
 
@@ -73,7 +79,10 @@ public class SwarmMapInit {
 	}
 
 	public void loadFromJson(String fileName) {
-		Gson gson = new GsonBuilder().setPrettyPrinting().enableComplexMapKeySerialization().create();
+		Gson gson = new GsonBuilder()
+				.setPrettyPrinting()
+				.enableComplexMapKeySerialization()
+				.create();
 		GlobalReader gread = new GlobalReader(fileName);
 		JSONObject jInit = new JSONObject();// getJSONObject()
 		jInit = gread.getJSONObject();
@@ -87,6 +96,8 @@ public class SwarmMapInit {
 		this.roverLocations = tswarm.roverLocations;
 		this.scienceLocations = tswarm.scienceLocations;
 		this.mapName = tswarm.mapName;
+		this.startPosCoord = tswarm.planetMap.getStartPosition();
+		this.targetPosCoord = tswarm.planetMap.getTargetPosition();
 	}
 
 	public int getMapWidth() {
@@ -117,170 +128,77 @@ public class SwarmMapInit {
 		BufferedReader bufRead = new BufferedReader(input);
 		String myLine = null;
 
-		// line 1
+		// line 1 - map name
 		this.mapName = bufRead.readLine();
 		System.out.println(this.mapName);
 
-		// line 2
-		// mapWidth = Integer.parseInt(bufRead.readLine());
-		String mapWidthStr = bufRead.readLine();
-		System.out.println(mapWidthStr);
+		// line 2 - map width and height
+		Coord mapSize = extractCoord(bufRead.readLine());
+		this.mapWidth = mapSize.xpos;
+		this.mapHeight = mapSize.ypos;
+		
+		// line 3 - start position (x, y) coordinate
+		Coord startPos = extractCoord(bufRead.readLine());
 
-		this.mapWidth = (int) Integer.parseInt(mapWidthStr);
-		System.out.println("int version " + this.mapWidth);
-
-		// line 3
-		String mapHeightStr = bufRead.readLine();
-		System.out.println(mapHeightStr);
-		this.mapHeight = (int) Integer.parseInt(mapHeightStr); 
-
-		this.planetMap = new PlanetMap(this.mapWidth, this.mapHeight);
-
+		// line 4 - target position x coordinate
+		Coord targetPos = extractCoord(bufRead.readLine());
+		
+		// line 5 - skip past the map letter key
+		bufRead.readLine();
+		
+		// line 6 - skip past the column number lines
+		bufRead.readLine();
+		
+		this.planetMap = new PlanetMap(this.mapWidth, this.mapHeight, startPos, targetPos);
+		
 		double yCount = 0.0;
-		// line 4
-		System.out.print(yCount + "-" + bufRead.readLine() + " things found: ");
-		System.out.println("");
-
-		while ((myLine = bufRead.readLine()) != null) {
+		
+		
+		while ((myLine = bufRead.readLine()) != null) { //might consider breaking based on map height check
 			int yPos = (int) yCount;
-			System.out.print(yCount + "-" + myLine + " things found: ");
+
 			for (int i = 0; i < mapWidth; i++) {
 				String tstr = myLine.substring(i * 3 + 1, i * 3 + 3);
 				if (isInteger(tstr)) {
 					String rName = "ROVER_" + tstr;
-					System.out.print(rName);
+					
 					roverLocations.putRover(RoverName.getEnum(rName), new Coord(i, yPos));
 				} else if (tstr.startsWith("__") || tstr.startsWith("  ")) {
-					System.out.print(tstr + " - ");
+					// do nothing
+					
 				} else {
 					String posOne = tstr.substring(0, 1);
 					if (!posOne.equals("_")) {
-						System.out.print("posOne: " + Terrain.getEnum(posOne) + " ");
+						
 						planetMap.setTile(new MapTile(posOne), i, yPos);
 					} else {
-						System.out.print("posOne: emmpty  ");
+						
 						planetMap.setTile(new MapTile("N"), i, yPos);
 					}
 
 					String posTwo = tstr.substring(1, 2);
 					if (!posTwo.equals("_")) {
-						System.out.print("posTwo: " + Science.getEnum(posTwo) + " ");
+						
 						scienceLocations.putScience(new Coord(i, yPos), Science.getEnum(posTwo));
 					} else {
-						System.out.print("posTwo: empty  ");
+						// do nothing
 					}
 				}
 			}
-
-			System.out.println("");
+			
 			yCount += 0.5;
 		}
 	}
 
-	public void printToDisplayTextFile() {
-		StringBuilder printMap = new StringBuilder();
-		printMap.append("map name");
-		printMap.append(mapHeight + "\n");
-		printMap.append(mapWidth + "\n");
-
-		for (int h = 0; h < mapWidth; h++) {
-			printMap.append(" __");
-		}
-		printMap.append("\n");
-		for (int j = 0; j < mapHeight; j++) {
-			for (int i = 0; i < mapWidth; i++) {
-				// check for rover
-				if (roverLocations.containsCoord(new Coord(i, j))) {
-					String rNum = roverLocations.getName(new Coord(i, j)).toString();
-					printMap.append("|" + rNum.substring(6));
-				} else {
-					printMap.append("|  ");
-				}
-			}
-			printMap.append("|\n");
-			for (int k = 0; k < mapWidth; k++) {
-				Coord tcor = new Coord(k, j);
-				if (planetMap.getTile(tcor).getTerrain() != Terrain.SOIL) {
-					printMap.append("|");
-					printMap.append(planetMap.getTile(tcor).getTerrain().getTerString());
-					if (scienceLocations.checkLocation(tcor)) {
-						printMap.append(scienceLocations.scanLocation(tcor).getSciString());
-					} else {
-						printMap.append("_");
-					}
-
-				} else if (planetMap.getTile(tcor).getTerrain() == Terrain.SOIL) {
-					printMap.append("|_");
-					if (scienceLocations.checkLocation(tcor)) {
-						printMap.append(scienceLocations.scanLocation(tcor).getSciString());
-					} else {
-						printMap.append("_");
-					}
-
-				} else {
-
-					printMap.append("|__");
-				}
-			}
-			printMap.append("|\n");
-		}
-
-		String printMapString = printMap.toString();
+	
+	public void printToDisplayTextFile() {	
+		String printMapString = makeInitString();		
 		System.out.println(printMapString);
 	}
 
-	public void saveToDisplayTextFile(String fileName) throws IOException {
-
-		StringBuilder printMap = new StringBuilder();
-		printMap.append(fileName + "\n");
-		printMap.append(mapHeight + "\n");
-		printMap.append(mapWidth + "\n");
-
-		for (int h = 0; h < mapWidth; h++) {
-			printMap.append(" __");
-		}
-		printMap.append("\n");
-		for (int j = 0; j < mapHeight; j++) {
-			for (int i = 0; i < mapWidth; i++) {
-				// check for rover
-				if (roverLocations.containsCoord(new Coord(i, j))) {
-					String rNum = roverLocations.getName(new Coord(i, j)).toString();
-					printMap.append("|" + rNum.substring(6));
-				} else {
-					printMap.append("|  ");
-				}
-			}
-			printMap.append("|\n");
-			for (int k = 0; k < mapWidth; k++) {
-				Coord tcor = new Coord(k, j);
-				if (planetMap.getTile(tcor).getTerrain() != Terrain.SOIL) {
-					printMap.append("|");
-					printMap.append(planetMap.getTile(tcor).getTerrain().getTerString());
-					if (scienceLocations.checkLocation(tcor)) {
-						printMap.append(scienceLocations.scanLocation(tcor).getSciString());
-					} else {
-						printMap.append("_");
-					}
-
-				} else if (planetMap.getTile(tcor).getTerrain() == Terrain.SOIL) {
-					printMap.append("|_");
-					if (scienceLocations.checkLocation(tcor)) {
-						printMap.append(scienceLocations.scanLocation(tcor).getSciString());
-					} else {
-						printMap.append("_");
-					}
-
-				} else {
-
-					printMap.append("|__");
-				}
-			}
-			printMap.append("|\n");
-		}
-
-		String printMapString = printMap.toString();
-		
-		System.out.println(printMapString);
+	
+	public void saveToDisplayTextFile(String fileName) throws IOException {		
+		String printMapString = makeInitString();
 		
 		try {
 			File file = new File(fileName);
@@ -293,7 +211,90 @@ public class SwarmMapInit {
 			e.printStackTrace();
 		}
 	}
+	
+	
+	public String makeInitString(){
+		StringBuilder printMap = new StringBuilder();
+		printMap.append(this.mapName + "\n");
+		printMap.append(this.planetMap.getWidth() + " " + this.planetMap.getHeight() + " Map_Width_Height\n");
+		printMap.append(planetMap.getStartPosition().xpos + " " + planetMap.getStartPosition().ypos + " StartPosition(x,y)\n");
+		printMap.append(planetMap.getTargetPosition().xpos + " " + planetMap.getTargetPosition().ypos + " TargetPosition(x,y)\n");
+		
+		printMap.append("KEY:<Terrain> R = Rock; G = Gravel; S = Sand; X = abyss;  <Science> Y = Radioactive; C = Crystal; M = Mineral; O = Organic; <Rover> ##\n");
+		
+		// print column numbers
+		printMap.append(" "); // shift right one space
+		for (int i = 0; i < mapWidth; i++) {
+			printMap.append(i + " ");
+			// set spacing on number of digits in column number
+			if(i < 10){
+				printMap.append(" ");
+			}
+		}
+		printMap.append("\n");
+		
+		// draw top row of lines
+		int rowCount = 0;
+		for (int h = 0; h < mapWidth; h++) {
+			printMap.append(" __");
+		}
+		printMap.append("\n");
+		
+		for (int j = 0; j < mapHeight; j++) {
+			for (int i = 0; i < mapWidth; i++) {
+				// check for rover
+				if (roverLocations.containsCoord(new Coord(i, j))) {
+					String rNum = roverLocations.getName(new Coord(i, j)).toString();
+					printMap.append("|" + rNum.substring(6));
+				} else {
+					printMap.append("|  ");
+				}
+			}
+			printMap.append("| " + rowCount++ + "\n"); // Print row numbers at end of row
+			for (int k = 0; k < mapWidth; k++) {
+				Coord tcor = new Coord(k, j);
+				if (planetMap.getTile(tcor).getTerrain() != Terrain.SOIL) {
+					printMap.append("|");
+					printMap.append(planetMap.getTile(tcor).getTerrain().getTerString());
+					if (scienceLocations.checkLocation(tcor)) {
+						printMap.append(scienceLocations.scanLocation(tcor).getSciString());
+					} else {
+						printMap.append("_");
+					}
 
+				} else if (planetMap.getTile(tcor).getTerrain() == Terrain.SOIL) {
+					printMap.append("|_");
+					if (scienceLocations.checkLocation(tcor)) {
+						printMap.append(scienceLocations.scanLocation(tcor).getSciString());
+					} else {
+						printMap.append("_");
+					}
+
+				} else {
+
+					printMap.append("|__");
+				}
+			}
+			printMap.append("|\n");
+		}
+
+		String printMapString = printMap.toString();
+		return printMapString;
+	}
+	
+	public static Coord extractCoord(String inputString) {
+		if (inputString.lastIndexOf(" ") != -1) {
+			String xPosStr = inputString.substring(0, inputString.indexOf(" "));
+			System.out.println("extracted xPosStr " + xPosStr);
+
+			String yPosStr = inputString.substring(inputString.indexOf(" ") +1, inputString.lastIndexOf(" "));
+			System.out.println("extracted yPosStr " + yPosStr);
+			return new Coord(Integer.parseInt(xPosStr), Integer.parseInt(yPosStr));
+		}
+		return null;
+	}
+
+	
 	// placeholder hack code till something better is inserted
 	public static boolean isInteger(String s) {
 		try {
@@ -307,6 +308,12 @@ public class SwarmMapInit {
 		return true;
 	}
 
+	
+	
+	/*
+	 * These are only used for testing and development
+	 */
+	
 	public void loadExampleTest() { // for testing purposes
 		this.mapWidth = 30;
 		this.mapHeight = 30;
