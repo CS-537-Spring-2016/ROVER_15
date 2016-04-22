@@ -51,7 +51,6 @@ public enum RoverName {
     	
     	switch(input){
     	case "ROVER_00":
-    		 System.out.println("ROVERNAME: case ROVER_00");
     		output = RoverName.ROVER_00;
     		break;
     	case "ROVER_01":

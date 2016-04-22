@@ -46,7 +46,7 @@ public class SwarmServer {
     
     private static SwarmMapInit mapInit = new SwarmMapInit();
     
-    private static final String mapFileName = "largeMap50x50map2.txt";
+    private static final String mapFileName = "Map50x50map2.txt";
 
     // TODO - these should actually be loaded from a file along with the map
     private static int mapWidth = 0;
@@ -54,6 +54,8 @@ public class SwarmServer {
     private static PlanetMap planetMap = null; // = new PlanetMap(mapWidth, mapHeight); 
     private static RoverLocations roverLocations = new RoverLocations();
     private static ScienceLocations scienceLocations = new ScienceLocations();
+    private static ArrayList<Science> collectedScience = new ArrayList<Science>();
+    private static ArrayList<ArrayList<Science>> corpCollectedScience = new ArrayList<ArrayList<Science>>();
     
 	static GUIdisplay mainPanel;
 	static MyGUIWorker myWorker;
@@ -71,7 +73,7 @@ public class SwarmServer {
     static final int CALLS_PER_SECOND_LIMIT = 500;
     
     // minimum time in milliseconds that has to pass before another Gather can be done
-    static final long GATHER_TIME_RESET = 2000;
+    static final long GATHER_TIME_RESET = 1800;
     
  // length of a side of the scan map array !!! must be odd number !!!
     static final int STANDARD_SCANMAP_RANGE = 7;
@@ -86,7 +88,7 @@ public class SwarmServer {
         ServerSocket listener = new ServerSocket(PORT);
         
         
-        mapInit.parseInputFromDisplayTextFile(mapFileName);
+        mapInit.parseInputFromDisplayTextFile(mapFileName);        
         
         mapHeight = mapInit.getMapHeight();
         mapWidth = mapInit.getMapWidth();
@@ -103,9 +105,8 @@ public class SwarmServer {
 		
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				//TODO - send a copy of the planetMap to GUI to use as background image
 				// currently sending it when calling the updateGUIDisplay() method
-				//GUIdisplay.createAndShowGui(myWorker, mainPanel);
+//**			GUIdisplay.createAndShowGui(myWorker, mainPanel);
 				GUIdisplay2.createAndShowGui(myWorker2, mainPanel2);
 				try {
 					updateGUIDisplay();
@@ -180,18 +181,11 @@ public class SwarmServer {
                 System.out.println("SWARM: make a rover name " + rname);
                 Rover rover = new Rover(rname);
                 
-                //System.out.println("SWARM: returned from making rover " + rname);
-                
-                // TODO - the question is whether to store the science in the rover thread or in the rover object
-                // Make an arrayList to hold any collected Science
-                //ArrayList<Science> scienceCargo = new ArrayList<Science>();
                 
                 
                 // ##### Run the Rover server process #####
-                while (true) {
+                while (true) {	
                 	//read command input from the Rover
-                	
-                	System.out.println("SWARM_SERVER "+roverNameString+ "_thread loop start");
                     String input = in.readLine();
 
                     //condition the input to empty string if null
@@ -199,7 +193,7 @@ public class SwarmServer {
                     	input = "";
                     }
                     
-                    // TODO - check requests per second
+                    // check requests per second
                     // if rover is too greedy drop their connection - checks how many total requests have been made in the last second
                     long roverServerRequestsPerSecond = rover.getRoverRequestCount();
                    	
@@ -209,7 +203,7 @@ public class SwarmServer {
                     }
                     
                     // debug checking
-                    System.out.println("SWARM_"+roverNameString+ "_thread: " + input);
+                    System.out.println("SWARM_SERVER_"+roverNameString+ "_thread: recieved command " + input);
                     
                       
                     
@@ -242,6 +236,7 @@ public class SwarmServer {
             	    	ypos = roverPos.ypos;
                     	out.println("LOC " + xpos + " " + ypos);
                     	
+                    
                     	
                     /**
                 	 * ***************** START_LOC *******************
@@ -253,7 +248,8 @@ public class SwarmServer {
                     	out.println("START_LOC " + startPos.xpos + " " + startPos.ypos);
                         	
                         	
-                        	
+                        
+                    	
                 	/**
                 	 * **************** TARGET_LOC ********************
                 	 */
@@ -285,6 +281,8 @@ public class SwarmServer {
             			out.println("SCAN_END");
                     	
                     	
+            			
+            			
                 	/**
                 	 * ******************* GATHER ***********************
                 	 */	
@@ -292,7 +290,7 @@ public class SwarmServer {
                     	// GATHER is a command with no return response
                     } else if(input.startsWith("GATHER")) {
                         
-                    	// does not need to synchronize-lock scienceLocations because not changing any values
+                    	// does not need to synchronize-lock roverLocations because not changing any values
                     	Coord roverPos = roverLocations.getLocation(rover.getRoverName());
                     	
                     	// lock scienceLocations because this requires checking then changing it
@@ -313,7 +311,7 @@ public class SwarmServer {
 	                    			 rover.scienceCargo.add(scienceLocations.takeScience(roverPos));
 	                    		}
 	                    	}
-                    	}
+                    	} //END synchronized lock
                  	
                     	
                     	
@@ -336,6 +334,8 @@ public class SwarmServer {
                     	out.println(jsonCargoList.toString());
                     	
                     	out.println("CARGO_END");
+                    	
+                    	
                     	
                     	
                 	/**
@@ -362,9 +362,15 @@ public class SwarmServer {
                     	
                     	out.println("EQUIPMENT_END");
                     	
+                    
+                    	
+                    	
+                	/**
+	            	 * *********** DEFAULT - no recognizable command received ****************
+	            	 */		       	
                     } else {
                     	//default response
-                    	out.println(input);
+                    	out.println("");
                     }
                     
                              
@@ -383,6 +389,7 @@ public class SwarmServer {
         
         // ########################################################################################################
         // support methods
+        
 
         // *** SCAN ***
 		private String retriveScanMap(Rover thisRover) {
