@@ -7,6 +7,8 @@ public class PlanetMap {
 	private int mapHeight;
 	private Coord startPosCoord;
 	private Coord targetPosCoord;
+	public static final int START_LOCATION_SIZE = 7;
+	public static final int TARGET_LOCATION_SIZE = 7;
 	
 	public PlanetMap(){
 		this.mapHeight = 0;

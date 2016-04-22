@@ -16,6 +16,7 @@ import javax.swing.*;
 
 import common.Coord;
 import common.GraphicTile;
+import common.LineSegment;
 import common.PlanetMap;
 import common.RoverLocations;
 import common.ScienceLocations;
@@ -25,7 +26,7 @@ import enums.Terrain;
 // http://stackoverflow.com/questions/30204521/thread-output-to-gui-text-field
 
 public class GUIdisplay2 extends JPanel implements MyGUIAppendable2 {
-	private final int TILE_SIZE = 20;
+	public static final int TILE_SIZE = 20;
 
 	private JTextArea area;
 	private int width;
@@ -33,6 +34,7 @@ public class GUIdisplay2 extends JPanel implements MyGUIAppendable2 {
 	private int pixelWidth;
 	private int pixelHeight;
 	private List<GraphicTile> graphicTiles;
+	private List<LineSegment> lineSegments;
 	private JTextField countdownClock = new JTextField();
 	private Timer timer;
 
@@ -46,6 +48,7 @@ public class GUIdisplay2 extends JPanel implements MyGUIAppendable2 {
 		this.pixelWidth = (this.width * TILE_SIZE);
 		this.pixelHeight = (this.height * TILE_SIZE);
 		graphicTiles = new ArrayList<>();
+		lineSegments = new ArrayList<>();
 		countDownClock();
 	}
 
@@ -97,8 +100,9 @@ public class GUIdisplay2 extends JPanel implements MyGUIAppendable2 {
 	}
 
 	@Override
-	public void drawThisGraphicTileArray(ArrayList<GraphicTile> gtarraylist) {
-		graphicTiles = gtarraylist;
+	public void drawThisGraphicTileArray(ArrayList<GraphicTile> gtarraylist, ArrayList<LineSegment> lineSegmentArrayList) {
+		this.graphicTiles = gtarraylist;
+		this.lineSegments = lineSegmentArrayList;
 		repaint();
 	}
 
@@ -123,6 +127,12 @@ public class GUIdisplay2 extends JPanel implements MyGUIAppendable2 {
 		for (int i = 0; i <= pixelHeight; i += TILE_SIZE) {
 			g.drawLine(0, i, pixelWidth, i);
 		}
+		// draw the start and target location outlines
+		for(LineSegment lineSegment : lineSegments){
+			g.setColor(lineSegment.lineColor);
+			g.drawLine(lineSegment.X1, lineSegment.Y1, lineSegment.X2, lineSegment.Y2);
+		}
+		
 	}
 
 	// Set the size of the map display
@@ -191,9 +201,11 @@ class MyGUIWorker2 extends SwingWorker<Void, String> {
 	public void displayGraphicMap(RoverLocations roverLoc, ScienceLocations sciloc, PlanetMap planetMap) {
 		int mWidth = planetMap.getWidth();
 		int mHeight = planetMap.getHeight();
-
+		
 		ArrayList<GraphicTile> graphicTiles = new ArrayList<GraphicTile>();
-
+		 
+		
+		//make the graphic tiles and place in array
 		for (int j = 0; j < mHeight; j++) {
 			for (int i = 0; i < mWidth; i++) {
 				// scan through the map - left to right, top to bottom
@@ -216,7 +228,66 @@ class MyGUIWorker2 extends SwingWorker<Void, String> {
 				graphicTiles.add(gtile);
 			}
 		}
-		myAppendable.drawThisGraphicTileArray(graphicTiles);
+		
+		// Load array with target and start location outline lineSegments
+		ArrayList<LineSegment> lineSegmentArrayList = new ArrayList<LineSegment>();
+		int tileSize = GUIdisplay2.TILE_SIZE;
+		int boxSize;
+		int minSafePos_x;
+		int maxSafePos_x;
+		int minSafePos_y;
+		int maxSafePos_y;
+		Color boxColor;
+		Coord startPos = planetMap.getStartPosition();
+		int strtPos_x = startPos.xpos;
+		int strtPos_y = startPos.ypos;
+		Coord targetPos = planetMap.getTargetPosition();
+		int targPos_x = targetPos.xpos;
+		int targPos_y = targetPos.ypos;
+		int startOffset = planetMap.START_LOCATION_SIZE / 2;
+		int targetOffset = planetMap.TARGET_LOCATION_SIZE / 2;
+			
+		minSafePos_x = Math.max(strtPos_x - startOffset, 0) ;
+		maxSafePos_x = Math.min(strtPos_x + startOffset, planetMap.getWidth()) ;
+		minSafePos_y = Math.max(strtPos_y - startOffset, 0) ;
+		maxSafePos_y = Math.min(strtPos_y + startOffset, planetMap.getHeight()) ;
+		boxSize = planetMap.START_LOCATION_SIZE;
+		boxColor = Color.MAGENTA;
+		
+		lineSegmentArrayList.add(
+				new LineSegment(minSafePos_x * tileSize, (maxSafePos_x * tileSize)  + tileSize, minSafePos_y * tileSize,  minSafePos_y * tileSize, boxColor));	
+		
+		lineSegmentArrayList.add(
+				new LineSegment(minSafePos_x * tileSize, (maxSafePos_x * tileSize)  + tileSize,  (maxSafePos_y * tileSize) + tileSize,  (maxSafePos_y * tileSize) + tileSize,  boxColor));
+		
+		lineSegmentArrayList.add(
+				new LineSegment(minSafePos_x * tileSize, minSafePos_x * tileSize, minSafePos_y * tileSize,  (maxSafePos_y  * tileSize) + tileSize, boxColor));	
+		
+		lineSegmentArrayList.add(
+				new LineSegment((maxSafePos_x * tileSize) + tileSize, (maxSafePos_x * tileSize) + tileSize,  minSafePos_y * tileSize,  (maxSafePos_y  * tileSize) + tileSize,  boxColor));
+
+		
+		minSafePos_x = Math.max(targPos_x - startOffset, 0) ;
+		maxSafePos_x = Math.min(targPos_x + startOffset, planetMap.getWidth() -1) ;
+		minSafePos_y = Math.max(targPos_y - startOffset, 0) ;
+		maxSafePos_y = Math.min(targPos_y + startOffset, planetMap.getHeight() -1) ;
+		boxSize = planetMap.TARGET_LOCATION_SIZE;
+		boxColor = Color.RED;
+		
+		lineSegmentArrayList.add(
+				new LineSegment(minSafePos_x * tileSize, (maxSafePos_x * tileSize)  + tileSize, minSafePos_y * tileSize,  minSafePos_y * tileSize, boxColor));	
+		
+		lineSegmentArrayList.add(
+				new LineSegment(minSafePos_x * tileSize, (maxSafePos_x * tileSize)  + tileSize,  (maxSafePos_y * tileSize) + tileSize,  (maxSafePos_y * tileSize) + tileSize,  boxColor));
+		
+		lineSegmentArrayList.add(
+				new LineSegment(minSafePos_x * tileSize, minSafePos_x * tileSize, minSafePos_y * tileSize,  (maxSafePos_y  * tileSize) + tileSize, boxColor));	
+		
+		lineSegmentArrayList.add(
+				new LineSegment((maxSafePos_x * tileSize) + tileSize, (maxSafePos_x * tileSize) + tileSize,  minSafePos_y * tileSize,  (maxSafePos_y  * tileSize) + tileSize,  boxColor));
+		
+		
+		myAppendable.drawThisGraphicTileArray(graphicTiles, lineSegmentArrayList);
 	}
 
 	public void displayFullMap(RoverLocations roverLoc, ScienceLocations sciloc, PlanetMap planetMap) {
@@ -232,7 +303,7 @@ class MyGUIWorker2 extends SwingWorker<Void, String> {
 }
 
 interface MyGUIAppendable2 {
-	public void drawThisGraphicTileArray(ArrayList<GraphicTile> gtarraylist);
+	public void drawThisGraphicTileArray(ArrayList<GraphicTile> graphicTileArraylist, ArrayList<LineSegment> lineSegmentArrayList);
 
 	public void append(String text);
 
