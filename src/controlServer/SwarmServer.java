@@ -13,8 +13,6 @@ import java.util.Map.Entry;
 
 import javax.swing.SwingUtilities;
 
-import org.json.simple.JSONArray;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -139,6 +137,8 @@ public class SwarmServer {
         private Socket socket;
         private BufferedReader in;
         private PrintWriter out;
+        
+        // keeps track of Rover's current location
         private int xpos = 0;
         private int ypos = 0;
         
@@ -191,7 +191,7 @@ public class SwarmServer {
                 while (true) {
                 	//read command input from the Rover
                 	
-                	System.out.println("SWARM_"+roverNameString+ "_thread: wait for a read line");
+                	System.out.println("SWARM_SERVER "+roverNameString+ "_thread loop start");
                     String input = in.readLine();
 
                     //condition the input to empty string if null
@@ -200,9 +200,8 @@ public class SwarmServer {
                     }
                     
                     // TODO - check requests per second
-                    // if rover is too greedy drop their connection
+                    // if rover is too greedy drop their connection - checks how many total requests have been made in the last second
                     long roverServerRequestsPerSecond = rover.getRoverRequestCount();
-                   	System.out.println("SWARM_"+roverNameString+ "_thread: roverServerRequestsPerSecond= " + roverServerRequestsPerSecond);
                    	
                     if(roverServerRequestsPerSecond > CALLS_PER_SECOND_LIMIT){
                     	System.out.println("SWARM_"+roverNameString+ "_thread: too many requests per second - dropping connection");
@@ -212,25 +211,28 @@ public class SwarmServer {
                     // debug checking
                     System.out.println("SWARM_"+roverNameString+ "_thread: " + input);
                     
-                    // Testing the input headers and respond with requested data
                       
-                    // *************** MOVE *****************
+                    
+                    /**
+                	 * ******************** MOVE **********************
+                	 */                   
                     if (input.startsWith("MOVE")){
                     	//System.out.println("SWARM: ------ MOVE ------"); //debug test input parsing
                     	// trim header off of input string
                     	String dir = input.substring(5);	
-                    	//System.out.println("SWARM: recived request move " + dir);
                     	
-                    	Coord locate = doMove(rover, dir); 
+                    	// invoke the doMove method to update the Rover position in the RoverLocations (roverLocations) static object
+                    	// this method also returns a Coord with the Rover position after the move attempt.
+                    	doMove(rover, dir); 
                     	
                     	// Update the GUI display with all the new rover locations when any individual rover moves
             	    	updateGUIDisplay();
-            	    	
-                    	//System.out.println("SWARM_"+roverNameString+ "_thread: new location " + locate);
                     	
             	    	
                     
-                    // *************** LOC *****************
+        	    	/**
+                	 * ******************** LOC **********************
+                	 */
                     // gets the current position of the rover	
                     } else if (input.startsWith("LOC")){  
                     	//System.out.println("SWARM: ------ LOC ------"); //debug test input parsing
@@ -240,88 +242,52 @@ public class SwarmServer {
             	    	ypos = roverPos.ypos;
                     	out.println("LOC " + xpos + " " + ypos);
                     	
-                	
                     	
-                    // *************** SCAN *****************
+                    /**
+                	 * ***************** START_LOC *******************
+                	 */
+                    // gets the current position of the rover	
+                    } else if (input.startsWith("START_LOC")){            
+                    	// does not need to synchronize-lock scienceLocations because not changing any values
+                    	Coord startPos = planetMap.getStartPosition();
+                    	out.println("START_LOC " + startPos.xpos + " " + startPos.ypos);
+                        	
+                        	
+                        	
+                	/**
+                	 * **************** TARGET_LOC ********************
+                	 */
+                    // gets the current position of the rover	
+                    } else if (input.startsWith("TARGET_LOC")){  
+                    	//System.out.println("SWARM: ------ TARGET_LOC ------"); //debug test input parsing
+                    	// does not need to synchronize-lock scienceLocations because not changing any values
+                    	Coord targetPos = planetMap.getTargetPosition();
+                    	out.println("START_LOC " + targetPos.xpos + " " + targetPos.ypos);
+                            	
+                            	
+                    	
+                	
+                	/**
+                	 * ******************** SCAN **********************
+                	 */
                     // return json array of map area close around the rover
                 	// may check rover tool for mastcam to increase range  of map results - maybe
                     } else if (input.startsWith("SCAN")){
-                    	//System.out.println("SWARM: ------ SCAN ------"); //debug test input parsing
-                    	Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                    	Coord roverPos = roverLocations.getLocation(rover.getRoverName());
                     	
-                    	// length of a side of the scan map array !!! must be odd number !!!
-                    	int scanRange = STANDARD_SCANMAP_RANGE;
-                    	// Adjust scanMap range with use of scan range booster
-                    	if(rover.getTool_1() == RoverToolType.RANGE_BOOTER || rover.getTool_2() == RoverToolType.RANGE_BOOTER){
-                    		scanRange = BOOSTED_SCANMAP_RANGE;
-                    	}
-                    	              
-                    	// make modified scienceLocations based on scanner tools available
- 
-                    	// because I don't want to accidentally change the original
-                    	HashMap<Coord, Science> sciHash = scienceLocations.getHashMapClone();
+                    	String jsonScanMap = retriveScanMap(rover);
                     	
-                    	HashMap<Coord, Science> filteredScienceLocations = new HashMap<Coord, Science>();
-                    	
-                    	// if(tool == radioactive)
-                    	if(rover.getTool_1() == RoverToolType.RADIATION_SENSOR || rover.getTool_2() == RoverToolType.RADIATION_SENSOR){
-	                	    for (Entry<Coord, Science> entry : sciHash.entrySet()) {
-	                	        if (Objects.equals(Science.RADIOACTIVE, entry.getValue())) {
-	                	        	filteredScienceLocations.put(entry.getKey(), Science.RADIOACTIVE);
-	                	        }
-	                	    }
-                    	}
-                    	
-                    	if(rover.getTool_1() == RoverToolType.CHEMICAL_SENSOR || rover.getTool_2() == RoverToolType.CHEMICAL_SENSOR){
-	                	    for (Entry<Coord, Science> entry : sciHash.entrySet()) {
-	                	        if (Objects.equals(Science.ORGANIC, entry.getValue())) {
-	                	        	filteredScienceLocations.put(entry.getKey(), Science.ORGANIC);
-	                	        }
-	                	    }
-                    	}
-                    	
-                    	if(rover.getTool_1() == RoverToolType.SPECTRAL_SENSOR || rover.getTool_2() == RoverToolType.SPECTRAL_SENSOR){
-	                	    for (Entry<Coord, Science> entry : sciHash.entrySet()) {
-	                	        if (Objects.equals(Science.CRYSTAL, entry.getValue())) {
-	                	        	filteredScienceLocations.put(entry.getKey(), Science.CRYSTAL);
-	                	        }
-	                	    }
-                    	}
-                    	
-                    	if(rover.getTool_1() == RoverToolType.RADAR_SENSOR || rover.getTool_2() == RoverToolType.RADAR_SENSOR){
-	                	    for (Entry<Coord, Science> entry : sciHash.entrySet()) {
-	                	        if (Objects.equals(Science.MINERAL, entry.getValue())) {
-	                	        	filteredScienceLocations.put(entry.getKey(), Science.MINERAL);
-	                	        }
-	                	    }
-                    	}
-                    	
-                    	
-                    	ScanMap scanMap = planetMap.getScanMap(roverPos, scanRange, roverLocations, new ScienceLocations(filteredScienceLocations));
-                    	//System.out.println("SWARM: printing scanMap"); //debug test input parsing
-                    	//scanMap.debugPrintMap();
-                    	
-                    	//System.out.println("SWARM: --- contents of roverLocations ---"); //debug test input parsing
-                    	//roverLocations.printRovers();
-                    	//System.out.println("SWARM: --- contents of roverLocations ---"); //debug test input parsing
-                    	             	
-                    	// convert scanMap object to json and return to rover
-                    	String jsonScanMap = gson.toJson(scanMap);
-                    	
-                    	//System.out.println("SWARM:" + jsonScanMap);
-                    	
-                    	out.println("SCAN"); //returns command header as check
-                    	
-                    	//return json string to Rover
-                    	out.println(jsonScanMap.toString());
+            			out.println("SCAN"); //returns command header as check
+            			
+            			//return json string to Rover
+            			out.println(jsonScanMap.toString());
 
-                    	//to mark the end of the json string
-                    	out.println("SCAN_END");
+            			//to mark the end of the json string
+            			out.println("SCAN_END");
                     	
                     	
-                    	
-                    // *************** GATHER *****************
+                	/**
+                	 * ******************* GATHER ***********************
+                	 */	
                     	// collect the science using either a drill or harvester
                     	// GATHER is a command with no return response
                     } else if(input.startsWith("GATHER")) {
@@ -352,11 +318,15 @@ public class SwarmServer {
                     	
                     	
                     	
-                    	
-                   // **************** CARGO ******************
+	            	/**
+	            	 * ******************* CARGO ***********************
+	            	 */	 	                
                     } else if(input.startsWith("CARGO")) {
                     // Check to see what is in the rovers cargo hold (collected science).
-                    	Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                    	Gson gson = new GsonBuilder()
+                    			.setPrettyPrinting()
+                    			.enableComplexMapKeySerialization()
+                    			.create();
                     	// return contents of scienceCargo
                     	String jsonCargoList = gson.toJson(rover.scienceCargo);
                     	
@@ -368,10 +338,14 @@ public class SwarmServer {
                     	out.println("CARGO_END");
                     	
                     	
-                    	
-                   // **************** EQUIPMENT ******************	
+                	/**
+	            	 * ******************* EQUIPMENT ***********************
+	            	 */	
                     } else if(input.startsWith("EQUIPMENT")) {
-                    	Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                    	Gson gson = new GsonBuilder()
+                    			.setPrettyPrinting()
+                    			.enableComplexMapKeySerialization()
+                    			.create();
                     	ArrayList<String> eqList = new ArrayList<String>();
                     	
                     	eqList.add(rover.getRoverDrive().toString());
@@ -405,114 +379,169 @@ public class SwarmServer {
                 } catch (IOException e) {  }
             }
         }
+        
+        
+        // ########################################################################################################
+        // support methods
+
+        // *** SCAN ***
+		private String retriveScanMap(Rover thisRover) {
+			//System.out.println("SWARM: ------ SCAN ------"); //debug test input parsing
+			Gson gson = new GsonBuilder()
+        			.setPrettyPrinting()
+        			.enableComplexMapKeySerialization()
+        			.create();
+			Coord roverPos = roverLocations.getLocation(thisRover.getRoverName());
+			
+			// length of a side of the scan map array !!! must be odd number !!!
+			int scanRange = STANDARD_SCANMAP_RANGE;
+			// Adjust scanMap range with use of scan range booster
+			if(thisRover.getTool_1() == RoverToolType.RANGE_BOOTER || thisRover.getTool_2() == RoverToolType.RANGE_BOOTER){
+				scanRange = BOOSTED_SCANMAP_RANGE;
+			}
+
+			// because I don't want to accidentally change the original
+			HashMap<Coord, Science> sciHash = scienceLocations.getHashMapClone();
+			
+			// This method builds a temporary science locations list based on Rover equipment
+			HashMap<Coord, Science> filteredScienceLocations = new HashMap<Coord, Science>();
+			
+			// Check what Scan Tools Rover is equipped with and filter scan results based on this
+			if(thisRover.getTool_1() == RoverToolType.RADIATION_SENSOR || thisRover.getTool_2() == RoverToolType.RADIATION_SENSOR){
+			    for (Entry<Coord, Science> entry : sciHash.entrySet()) {
+			        if (Objects.equals(Science.RADIOACTIVE, entry.getValue())) {
+			        	filteredScienceLocations.put(entry.getKey(), Science.RADIOACTIVE);
+			        }
+			    }
+			}
+			
+			if(thisRover.getTool_1() == RoverToolType.CHEMICAL_SENSOR || thisRover.getTool_2() == RoverToolType.CHEMICAL_SENSOR){
+			    for (Entry<Coord, Science> entry : sciHash.entrySet()) {
+			        if (Objects.equals(Science.ORGANIC, entry.getValue())) {
+			        	filteredScienceLocations.put(entry.getKey(), Science.ORGANIC);
+			        }
+			    }
+			}
+			
+			if(thisRover.getTool_1() == RoverToolType.SPECTRAL_SENSOR || thisRover.getTool_2() == RoverToolType.SPECTRAL_SENSOR){
+			    for (Entry<Coord, Science> entry : sciHash.entrySet()) {
+			        if (Objects.equals(Science.CRYSTAL, entry.getValue())) {
+			        	filteredScienceLocations.put(entry.getKey(), Science.CRYSTAL);
+			        }
+			    }
+			}
+			
+			if(thisRover.getTool_1() == RoverToolType.RADAR_SENSOR || thisRover.getTool_2() == RoverToolType.RADAR_SENSOR){
+			    for (Entry<Coord, Science> entry : sciHash.entrySet()) {
+			        if (Objects.equals(Science.MINERAL, entry.getValue())) {
+			        	filteredScienceLocations.put(entry.getKey(), Science.MINERAL);
+			        }
+			    }
+			}
+			
+			// pass parameters to PlanetMap class to get a subset map of the surrounding area
+			ScanMap scanMap = planetMap.getScanMap(roverPos, scanRange, roverLocations, new ScienceLocations(filteredScienceLocations));
+			             	
+			// convert scanMap object to json and return to rover
+			String jsonScanMap = gson.toJson(scanMap);
+			
+			return jsonScanMap;		                 	
+		}
     }
     
-   // ########################################################################################################
-   // support methods
-    
-    static Coord doMove(Rover rover, String dir) throws Exception{ 
+
+   
+    // ** MOVE **
+    static Coord doMove(Rover thisRover, String requestedMoveDir) throws Exception{ 
     	// *** pay close attention to this "synchronized" and make sure it works as intended ***
     	// MOVE has to lock the roverLocations list because it needs to change it's contents
     	synchronized (roverLocations){
-	    	Coord roverPos = roverLocations.getLocation(rover.getRoverName());
-	    	int xpos = roverPos.xpos;
-	    	int ypos = roverPos.ypos;
+	    	Coord roverPos = roverLocations.getLocation(thisRover.getRoverName());
+	    	int xCurrentPos = roverPos.xpos;
+	    	int yCurrentPos = roverPos.ypos;
 	    	
-	    	
-	    	// actual results will depend on rover type drive system and terrain features
-	    	// also must check other rover positions and prevent collision
 
-	    	//System.out.println("SWARM: drive type " + rover.getRoverDrive());
-	    	//System.out.println("SWARM: last time " + rover.getRoverLastMoveTime());
-	    	//System.out.println("SWARM: time diff " + ( (System.currentTimeMillis() + WHEELS_TIME_PER_SQUARE - rover.getRoverLastMoveTime() )));
-	    	
-	    	
+	    		    	
 	    	// ********* WHEELS **********	
     		// Respond based on the rover drive type AND
-    		// Check that is has been at a minimum of 1 second (WHEEL velocity) since the rover last moved
+    		// Check that is has been at a minimum of "time limeit per second" seconds (WHEEL velocity) since the rover last moved
 	    	// AND check that it is not stuck in the sand
-	    	if(rover.getRoverDrive() == RoverDriveType.WHEELS
-	    			&& rover.getRoverLastMoveTime() + WHEELS_TIME_PER_SQUARE < (System.currentTimeMillis() )
+	    	if(thisRover.getRoverDrive() == RoverDriveType.WHEELS
+	    			&& thisRover.getRoverLastMoveTime() + WHEELS_TIME_PER_SQUARE < (System.currentTimeMillis() )
 	    			&& planetMap.getTile(roverPos).getTerrain() != Terrain.SAND){
-	    		
-	    			//System.out.println("SWARM: " + rover.getRoverName() + " making valid move"); //debug status out
-	    		
-	    			if(dir.equals("N")){
-	    				ypos = ypos - 1;
-	    				if(!isValid_Y(ypos)){
+	    			    		
+	    			if(requestedMoveDir.equals("N")){
+	    				yCurrentPos = yCurrentPos - 1;
+	    				if(!isValid_Y(yCurrentPos)){
 	    					// On the edge, returns rovers current position unchanged
 	    					return roverPos;
 	    				}
 		    		
 		    		//check planetMap (immutable)
-		    		MapTile moveThere = planetMap.getTile(xpos, ypos);
-			    		if(moveThere.getTerrain() != Terrain.ROCK && moveThere.getTerrain() != Terrain.NONE){
+		    		MapTile possibleMovetoTile = planetMap.getTile(xCurrentPos, yCurrentPos);
+			    		if(possibleMovetoTile.getTerrain() != Terrain.ROCK && possibleMovetoTile.getTerrain() != Terrain.NONE){
 				    		// Move to the new map square, unless occupied by another rover
-				    		
-				    		if(roverLocations.moveRover(rover.getRoverName(), new Coord(xpos, ypos))){
-				    			rover.updateMoveTime();
-				    			//System.out.println("went north 1"); //debug status out
+				    		if(roverLocations.moveRover(thisRover.getRoverName(), new Coord(xCurrentPos, yCurrentPos))){
+				    			// if moveRover call is successful then update latest move time value
+				    			thisRover.updateMoveTime();
 				    		} else {
 				    			//System.out.println("no move north, rover in the way"); //debug status out
 				    		}
 			    		}
 	    			}
 		    	
-	    			if(dir.equals("S")){
-	    					ypos = ypos + 1;
-		    				if(!isValid_Y(ypos)){
+	    			if(requestedMoveDir.equals("S")){
+	    					yCurrentPos = yCurrentPos + 1;
+		    				if(!isValid_Y(yCurrentPos)){
 		    					// On the edge, returns rovers current position unchanged
 		    					return roverPos;
 		    				}
 		    				
 			    		//check planetMap (immutable)
-			    		MapTile moveThere = planetMap.getTile(xpos, ypos);
+			    		MapTile moveThere = planetMap.getTile(xCurrentPos, yCurrentPos);
 			    		if(moveThere.getTerrain() != Terrain.ROCK && moveThere.getTerrain() != Terrain.NONE){
 				    		// Move to the new map square, unless occupied by another rover
-				    		
-				    		if(roverLocations.moveRover(rover.getRoverName(), new Coord(xpos, ypos))){
-				    			rover.updateMoveTime();
-				    			//System.out.println("went south 1"); //debug status out
+				    		if(roverLocations.moveRover(thisRover.getRoverName(), new Coord(xCurrentPos, yCurrentPos))){
+				    			// if moveRover call is successful then update latest move time value
+				    			thisRover.updateMoveTime();
 				    		} else {
 				    			//System.out.println("no move south, rover in the way"); //debug status out
 				    		}
 			    		}
 	    			}
 		    		
-	    			if(dir.equals("E")){
-			    		xpos = xpos + 1;
-	    				if(!isValid_X(xpos)){
+	    			if(requestedMoveDir.equals("E")){
+			    		xCurrentPos = xCurrentPos + 1;
+	    				if(!isValid_X(xCurrentPos)){
 	    					// On the edge, returns rovers current position unchanged
 	    					return roverPos;
 	    				}
 			    		//check planetMap (immutable)
-			    		MapTile moveThere = planetMap.getTile(xpos, ypos);
+			    		MapTile moveThere = planetMap.getTile(xCurrentPos, yCurrentPos);
 			    		if(moveThere.getTerrain() != Terrain.ROCK && moveThere.getTerrain() != Terrain.NONE){
-				    		// Move to the new map square, unless occupied by another rover
-				    		
-				    		if(roverLocations.moveRover(rover.getRoverName(), new Coord(xpos, ypos))){
-				    			rover.updateMoveTime();
-				    			//System.out.println("went east 1"); //debug status out
+				    		// Move to the new map square, unless occupied by another rover	
+				    		if(roverLocations.moveRover(thisRover.getRoverName(), new Coord(xCurrentPos, yCurrentPos))){
+				    			// if moveRover call is successful then update latest move time value
+				    			thisRover.updateMoveTime();
 				    		} else {
 				    			//System.out.println("no move east, rover in the way"); //debug status out
 				    		}
 			    		}
 	    			}
 	    			
-	    			if(dir.equals("W")){
-			    		xpos = xpos - 1;
-	    				if(!isValid_X(xpos)){
+	    			if(requestedMoveDir.equals("W")){
+			    		xCurrentPos = xCurrentPos - 1;
+	    				if(!isValid_X(xCurrentPos)){
 	    					// On the edge, returns rovers current position unchanged
 	    					return roverPos;
 	    				}
 			    		//check planetMap (immutable)
-			    		MapTile moveThere = planetMap.getTile(xpos, ypos);
+			    		MapTile moveThere = planetMap.getTile(xCurrentPos, yCurrentPos);
 			    		if(moveThere.getTerrain() != Terrain.ROCK && moveThere.getTerrain() != Terrain.NONE){
 				    		// Move to the new map square, unless occupied by another rover
-				    		
-				    		if(roverLocations.moveRover(rover.getRoverName(), new Coord(xpos, ypos))){
-				    			rover.updateMoveTime();
-				    			//System.out.println("went east 1"); //debug status out
+				    		if(roverLocations.moveRover(thisRover.getRoverName(), new Coord(xCurrentPos, yCurrentPos))){
+				    			// if moveRover call is successful then update latest move time value
+				    			thisRover.updateMoveTime();
 				    		} else {
 				    			//System.out.println("no move east, rover in the way"); //debug status out
 				    		}
@@ -522,85 +551,79 @@ public class SwarmServer {
 	    	
 	    	// ********* TREADS **********
 	    	// TREADS dont get stuck
-	    	if(rover.getRoverDrive() == RoverDriveType.TREADS
-	    			&& rover.getRoverLastMoveTime() + TREADS_TIME_PER_SQUARE < (System.currentTimeMillis()) ){
-	    		
-	    			//System.out.println("SWARM: " + rover.getRoverName() + " making valid move"); //debug status out
-	    		
-	    			if(dir.equals("N")){
-		    		ypos = ypos - 1;
-    				if(!isValid_Y(ypos)){
+	    	if(thisRover.getRoverDrive() == RoverDriveType.TREADS
+	    			&& thisRover.getRoverLastMoveTime() + TREADS_TIME_PER_SQUARE < (System.currentTimeMillis()) ){
+	    			    		
+	    			if(requestedMoveDir.equals("N")){
+		    		yCurrentPos = yCurrentPos - 1;
+    				if(!isValid_Y(yCurrentPos)){
     					// On the edge, returns rovers current position unchanged
     					return roverPos;
     				}
 		    		//check planetMap (immutable)
-		    		MapTile moveThere = planetMap.getTile(xpos, ypos);
+		    		MapTile moveThere = planetMap.getTile(xCurrentPos, yCurrentPos);
 			    		if(moveThere.getTerrain() != Terrain.ROCK && moveThere.getTerrain() != Terrain.NONE){
-				    		// Move to the new map square, unless occupied by another rover
-				    		
-				    		if(roverLocations.moveRover(rover.getRoverName(), new Coord(xpos, ypos))){
-				    			rover.updateMoveTime();
-				    			//System.out.println("went north 1"); //debug status out
+				    		// Move to the new map square, unless occupied by another rover 		
+				    		if(roverLocations.moveRover(thisRover.getRoverName(), new Coord(xCurrentPos, yCurrentPos))){
+				    			// if moveRover call is successful then update latest move time value
+				    			thisRover.updateMoveTime();
 				    		} else {
 				    			//System.out.println("no move north, rover in the way"); //debug status out
 				    		}
 			    		}
 	    			}
 		    	
-	    			if(dir.equals("S")){
-		    		ypos = ypos + 1;
-    				if(!isValid_Y(ypos)){
+	    			if(requestedMoveDir.equals("S")){
+		    		yCurrentPos = yCurrentPos + 1;
+    				if(!isValid_Y(yCurrentPos)){
     					// On the edge, returns rovers current position unchanged
     					return roverPos;
     				}
 		    		//check planetMap (immutable)
-		    		MapTile moveThere = planetMap.getTile(xpos, ypos);
+		    		MapTile moveThere = planetMap.getTile(xCurrentPos, yCurrentPos);
 			    		if(moveThere.getTerrain() != Terrain.ROCK && moveThere.getTerrain() != Terrain.NONE){
-				    		// Move to the new map square, unless occupied by another rover
-				    		
-				    		if(roverLocations.moveRover(rover.getRoverName(), new Coord(xpos, ypos))){
-				    			rover.updateMoveTime();
-				    			//System.out.println("went south 1"); //debug status out
+				    		// Move to the new map square, unless occupied by another rover		    		
+				    		if(roverLocations.moveRover(thisRover.getRoverName(), new Coord(xCurrentPos, yCurrentPos))){
+				    			// if moveRover call is successful then update latest move time value
+				    			thisRover.updateMoveTime();
 				    		} else {
 				    			//System.out.println("no move south, rover in the way"); //debug status out
 				    		}
 			    		}
 	    			}
 	    			
-	    			if(dir.equals("E")){
-			    		xpos = xpos + 1;
-	    				if(!isValid_X(xpos)){
+	    			if(requestedMoveDir.equals("E")){
+			    		xCurrentPos = xCurrentPos + 1;
+	    				if(!isValid_X(xCurrentPos)){
 	    					// On the edge, returns rovers current position unchanged
 	    					return roverPos;
 	    				}
 			    		//check planetMap (immutable)
-			    		MapTile moveThere = planetMap.getTile(xpos, ypos);
+			    		MapTile moveThere = planetMap.getTile(xCurrentPos, yCurrentPos);
 				    		if(moveThere.getTerrain() != Terrain.ROCK && moveThere.getTerrain() != Terrain.NONE){
 					    		// Move to the new map square, unless occupied by another rover
-					    		
-					    		if(roverLocations.moveRover(rover.getRoverName(), new Coord(xpos, ypos))){
-					    			rover.updateMoveTime();
-					    			//System.out.println("went east 1"); //debug status out
+					    		if(roverLocations.moveRover(thisRover.getRoverName(), new Coord(xCurrentPos, yCurrentPos))){
+					    			// if moveRover call is successful then update latest move time value
+					    			thisRover.updateMoveTime();
 					    		} else {
 					    			//System.out.println("no move east, rover in the way"); //debug status out
 					    		}
 				    		}
 		    			}
 	    			
-	    			if(dir.equals("W")){
-			    		xpos = xpos - 1;
-	    				if(!isValid_X(xpos)){
+	    			if(requestedMoveDir.equals("W")){
+			    		xCurrentPos = xCurrentPos - 1;
+	    				if(!isValid_X(xCurrentPos)){
 	    					// On the edge, returns rovers current position unchanged
 	    					return roverPos;
 	    				}
 			    		//check planetMap (immutable)
-			    		MapTile moveThere = planetMap.getTile(xpos, ypos);
+			    		MapTile moveThere = planetMap.getTile(xCurrentPos, yCurrentPos);
 				    		if(moveThere.getTerrain() != Terrain.ROCK && moveThere.getTerrain() != Terrain.NONE){
-					    		// Move to the new map square, unless occupied by another rover
-					    		
-					    		if(roverLocations.moveRover(rover.getRoverName(), new Coord(xpos, ypos))){
-					    			rover.updateMoveTime();
-					    			//System.out.println("went west 1"); //debug status out
+					    		// Move to the new map square, unless occupied by another rover	
+					    		if(roverLocations.moveRover(thisRover.getRoverName(), new Coord(xCurrentPos, yCurrentPos))){
+					    			// if moveRover call is successful then update latest move time value
+					    			thisRover.updateMoveTime();
 					    		} else {
 					    			//System.out.println("no move west, rover in the way"); //debug status out
 					    		}
@@ -611,95 +634,88 @@ public class SwarmServer {
 
 	    	// ********* WALKER **********
 	    	// WALKERS also get stuck in sand
-	    	if(rover.getRoverDrive() == RoverDriveType.WALKER
-	    			&& rover.getRoverLastMoveTime() + WALKER_TIME_PER_SQUARE < (System.currentTimeMillis()) 
+	    	if(thisRover.getRoverDrive() == RoverDriveType.WALKER
+	    			&& thisRover.getRoverLastMoveTime() + WALKER_TIME_PER_SQUARE < (System.currentTimeMillis()) 
 	    			&& planetMap.getTile(roverPos).getTerrain() != Terrain.SAND){
 	    		
-	    			//System.out.println("SWARM: " + rover.getRoverName() + " making valid move"); //debug status out
-	    		
-	    			if(dir.equals("N")){
-		    		ypos = ypos - 1;
-    				if(!isValid_Y(ypos)){
+	    			if(requestedMoveDir.equals("N")){
+		    		yCurrentPos = yCurrentPos - 1;
+    				if(!isValid_Y(yCurrentPos)){
     					// On the edge, returns rovers current position unchanged
     					return roverPos;
     				}
 		    		//check planetMap (immutable)
-		    		MapTile moveThere = planetMap.getTile(xpos, ypos);
+		    		MapTile moveThere = planetMap.getTile(xCurrentPos, yCurrentPos);
 			    		if( moveThere.getTerrain() != Terrain.NONE){
-				    		// Move to the new map square, unless occupied by another rover
-				    		
-				    		if(roverLocations.moveRover(rover.getRoverName(), new Coord(xpos, ypos))){
-				    			rover.updateMoveTime();
-				    			//System.out.println("went north 1"); //debug status out
+				    		// Move to the new map square, unless occupied by another rover		    		
+				    		if(roverLocations.moveRover(thisRover.getRoverName(), new Coord(xCurrentPos, yCurrentPos))){
+				    			// if moveRover call is successful then update latest move time value
+				    			thisRover.updateMoveTime();
 				    		} else {
 				    			//System.out.println("no move north, rover in the way"); //debug status out
 				    		}
 			    		}
 	    			}
 		    	
-	    			if(dir.equals("S")){
-		    		ypos = ypos + 1;
-    				if(!isValid_Y(ypos)){
+	    			if(requestedMoveDir.equals("S")){
+		    		yCurrentPos = yCurrentPos + 1;
+    				if(!isValid_Y(yCurrentPos)){
     					// On the edge, returns rovers current position unchanged
     					return roverPos;
     				}
 		    		//check planetMap (immutable)
-		    		MapTile moveThere = planetMap.getTile(xpos, ypos);
+		    		MapTile moveThere = planetMap.getTile(xCurrentPos, yCurrentPos);
 			    		if( moveThere.getTerrain() != Terrain.NONE){
 				    		// Move to the new map square, unless occupied by another rover
-				    		
-				    		if(roverLocations.moveRover(rover.getRoverName(), new Coord(xpos, ypos))){
-				    			rover.updateMoveTime();
-				    			//System.out.println("went south 1"); //debug status out
+				    		if(roverLocations.moveRover(thisRover.getRoverName(), new Coord(xCurrentPos, yCurrentPos))){
+				    			// if moveRover call is successful then update latest move time value
+				    			thisRover.updateMoveTime();
 				    		} else {
 				    			//System.out.println("no move south, rover in the way"); //debug status out
 				    		}
 			    		}
 	    			}
 	    			
-	    			if(dir.equals("E")){
-			    		xpos = xpos + 1;
-	    				if(!isValid_X(xpos)){
+	    			if(requestedMoveDir.equals("E")){
+			    		xCurrentPos = xCurrentPos + 1;
+	    				if(!isValid_X(xCurrentPos)){
 	    					// On the edge, returns rovers current position unchanged
 	    					return roverPos;
 	    				}
 			    		//check planetMap (immutable)
-			    		MapTile moveThere = planetMap.getTile(xpos, ypos);
+			    		MapTile moveThere = planetMap.getTile(xCurrentPos, yCurrentPos);
 				    		if( moveThere.getTerrain() != Terrain.NONE){
-					    		// Move to the new map square, unless occupied by another rover
-					    		
-					    		if(roverLocations.moveRover(rover.getRoverName(), new Coord(xpos, ypos))){
-					    			rover.updateMoveTime();
-					    			//System.out.println("went east 1"); //debug status out
+					    		// Move to the new map square, unless occupied by another rover	
+					    		if(roverLocations.moveRover(thisRover.getRoverName(), new Coord(xCurrentPos, yCurrentPos))){
+					    			// if moveRover call is successful then update latest move time value
+					    			thisRover.updateMoveTime();
 					    		} else {
 					    			//System.out.println("no move east, rover in the way"); //debug status out
 					    		}
 				    		}
 		    			}
 	    			
-	    			if(dir.equals("W")){
-			    		xpos = xpos - 1;
-	    				if(!isValid_X(xpos)){
+	    			if(requestedMoveDir.equals("W")){
+			    		xCurrentPos = xCurrentPos - 1;
+	    				if(!isValid_X(xCurrentPos)){
 	    					// On the edge, returns rovers current position unchanged
 	    					return roverPos;
 	    				}
 			    		//check planetMap (immutable)
-			    		MapTile moveThere = planetMap.getTile(xpos, ypos);
+			    		MapTile moveThere = planetMap.getTile(xCurrentPos, yCurrentPos);
 				    		if( moveThere.getTerrain() != Terrain.NONE){
 					    		// Move to the new map square, unless occupied by another rover
-					    		
-					    		if(roverLocations.moveRover(rover.getRoverName(), new Coord(xpos, ypos))){
-					    			rover.updateMoveTime();
-					    			//System.out.println("went west 1"); //debug status out
+					    		if(roverLocations.moveRover(thisRover.getRoverName(), new Coord(xCurrentPos, yCurrentPos))){
+					    			// if moveRover call is successful then update latest move time value
+					    			thisRover.updateMoveTime();
 					    		} else {
 					    			//System.out.println("no move west, rover in the way"); //debug status out
 					    		}
 				    		}
 		    			}
 	    	}
-	    	 	
-	    	Coord newPos = new Coord(xpos,ypos);
-	    	return newPos;
+	    	 		    	
+	    	return new Coord(xCurrentPos,yCurrentPos);
     	} // *** release syncro lock on roverLocations
     }
     
