@@ -216,6 +216,7 @@ class MyGUIWorker2 extends SwingWorker<Void, String> {
 					String rNum = roverLoc.getName(tcor).toString();
 					// make a tile with rover number
 					gtile.setRoverName(rNum.substring(6));
+					System.out.println("GUIdisplay: setRoverName " + rNum.substring(6));
 					// then check if there is a terrain feature (if not SOIL
 					// then add terrain to graphicTile )
 				}

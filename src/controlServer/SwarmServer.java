@@ -46,7 +46,7 @@ public class SwarmServer {
     
     private static SwarmMapInit mapInit = new SwarmMapInit();
     
-    private static final String mapFileName = "Map50x50map2.txt";
+    private static String mapFileName = "Map50x50map2.txt";
 
     // TODO - these should actually be loaded from a file along with the map
     private static int mapWidth = 0;
@@ -54,7 +54,9 @@ public class SwarmServer {
     private static PlanetMap planetMap = null; // = new PlanetMap(mapWidth, mapHeight); 
     private static RoverLocations roverLocations = new RoverLocations();
     private static ScienceLocations scienceLocations = new ScienceLocations();
-    private static ArrayList<Science> collectedScience = new ArrayList<Science>();
+    private static ArrayList<Science> collectedScience_0 = new ArrayList<Science>();
+    private static ArrayList<Science> collectedScience_1 = new ArrayList<Science>();
+    private static ArrayList<Science> collectedScience_2 = new ArrayList<Science>();
     private static ArrayList<ArrayList<Science>> corpCollectedScience = new ArrayList<ArrayList<Science>>();
     
 	static GUIdisplay mainPanel;
@@ -84,9 +86,16 @@ public class SwarmServer {
      * spawns handler threads.
      */
     public static void main(String[] args) throws Exception {
+    	// if a command line argument is included it is used as the map filename
+    	for (String s: args){
+    		mapFileName = s;
+    	}
         System.out.println("The Swarm server is running.");
         ServerSocket listener = new ServerSocket(PORT);
         
+        corpCollectedScience.add(collectedScience_0);
+        corpCollectedScience.add(collectedScience_1);
+        corpCollectedScience.add(collectedScience_2);
         
         mapInit.parseInputFromDisplayTextFile(mapFileName);        
         
@@ -178,7 +187,7 @@ public class SwarmServer {
                 
                 // make and instantiate a Rover object connected to this thread
                 RoverName rname = RoverName.getEnum(roverNameString); 
-                System.out.println("SWARM: make a rover name " + rname);
+                //System.out.println("SWARM: make a rover name " + rname);
                 Rover rover = new Rover(rname);
                 
                 
@@ -203,7 +212,7 @@ public class SwarmServer {
                     }
                     
                     // debug checking
-                    System.out.println("SWARM_SERVER_"+roverNameString+ "_thread: recieved command " + input);
+                    //System.out.println("SWARM_SERVER_"+roverNameString+ "_thread: recieved command " + input);
                     
                       
                     
@@ -243,7 +252,7 @@ public class SwarmServer {
                 	 */
                     // gets the current position of the rover	
                     } else if (input.startsWith("START_LOC")){  
-                    	System.out.println("SWARM: ------ START_LOC ------"); //debug test input parsing
+                    	//System.out.println("SWARM: ------ START_LOC ------"); //debug test input parsing
                     	// does not need to synchronize-lock scienceLocations because not changing any values
                     	Coord startPos = planetMap.getStartPosition();
                     	out.println("START_LOC " + startPos.xpos + " " + startPos.ypos);
@@ -303,13 +312,19 @@ public class SwarmServer {
 	                    		if((rover.getTool_1() == RoverToolType.DRILL || (rover.getTool_2() == RoverToolType.DRILL) 
 	                    				 && (planetMap.getTile(roverPos).getTerrain() == Terrain.ROCK || planetMap.getTile(roverPos).getTerrain() == Terrain.GRAVEL))){
 	                    			// remove the science from scienceLocations and store in rover scienceCargo	
-	                    			 rover.scienceCargo.add(scienceLocations.takeScience(roverPos));
+	                    			Science foundScience = scienceLocations.takeScience(roverPos);
+	                    			rover.scienceCargo.add(foundScience);
+	                    			corpCollectedScience.get(getCorpNumber(rover)).add(foundScience);
+	                    			System.out.println("SwarmServer: corp " + getCorpNumber(rover) + " total science = " + corpCollectedScience.get(getCorpNumber(rover)).size());
 	                    		}
 	                    		
 	                    		if((rover.getTool_1() == RoverToolType.EXCAVATOR || (rover.getTool_2() == RoverToolType.EXCAVATOR) 
 	                    				 && (planetMap.getTile(roverPos).getTerrain() == Terrain.SOIL || planetMap.getTile(roverPos).getTerrain() == Terrain.SAND))){
 	                    			// remove the science from scienceLocations and store in rover scienceCargo	
-	                    			 rover.scienceCargo.add(scienceLocations.takeScience(roverPos));
+	                    			Science foundScience = scienceLocations.takeScience(roverPos);
+	                    			rover.scienceCargo.add(foundScience);
+	                    			corpCollectedScience.get(getCorpNumber(rover)).add(foundScience);
+	                    			System.out.println("SwarmServer: corp " + getCorpNumber(rover) + " total science = " + corpCollectedScience.get(getCorpNumber(rover)).size());
 	                    		}
 	                    	}
                     	} //END synchronized lock
@@ -744,5 +759,21 @@ public class SwarmServer {
 		//myWorker.displayActivity(roverLocations, scienceLocations);
 		//myWorker.displayFullMap(roverLocations, scienceLocations, planetMap);
 		myWorker2.displayFullMap(roverLocations.clone(), scienceLocations, planetMap);
+	}
+	
+	// sad face - more hard coded bs
+	private static int getCorpNumber(Rover aRover){
+		int tnum = 0;
+		String roverNumber = aRover.getRoverName().toString().substring(6);
+		if(roverNumber.equals("01") || roverNumber.equals("02") || roverNumber.equals("03") 
+				|| roverNumber.equals("04") || roverNumber.equals("05") || roverNumber.equals("06") 
+				|| roverNumber.equals("07") || roverNumber.equals("08") || roverNumber.equals("09")){
+			tnum = 1;
+		} else if(roverNumber.equals("10") || roverNumber.equals("11") || roverNumber.equals("12") 
+				|| roverNumber.equals("13") || roverNumber.equals("14") || roverNumber.equals("15") 
+				|| roverNumber.equals("16") || roverNumber.equals("17") || roverNumber.equals("18")){
+			tnum = 2;
+		} 
+		return tnum;
 	}
 }
