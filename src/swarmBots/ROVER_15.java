@@ -22,8 +22,6 @@ import enums.Terrain;
  * publishing their code examples
  */
 
-// 4/16: This is literally just a copy of ROVER_99
-
 public class ROVER_15 {
 
 	BufferedReader in;
@@ -139,11 +137,7 @@ public class ROVER_15 {
 			scanMap.debugPrintMap();
 			
 			
-			/* TODO: ****** Utilization of TOOLS *****
-			 * IF there is a MapTile rock with science, use Drill 
-			 * IF there is a MapTile sand, gravel, or soil with science, use Excavator 
-			 * For now, hardcode MapTiles with these elements.
-	         */
+			
 
 			
 			// MOVING
@@ -161,7 +155,6 @@ public class ROVER_15 {
 				
 			} else {
 
-				// TODO: Update Block parameters. Rock does not block because we have a Drill to get through 
 
 				// pull the MapTile array out of the ScanMap object
 				MapTile[][] scanMapTiles = scanMap.getScanMap();
@@ -317,8 +310,6 @@ public class ROVER_15 {
 	public static Coord extractLOC(String sStr) {
 		sStr = sStr.substring(4);
 		if (sStr.lastIndexOf(" ") != -1) {
-			
-			// TODO: If there are extra 0s before a number, parse so that it recognizes the correct number
 			String xStr = sStr.substring(0, sStr.lastIndexOf(" "));
 			//System.out.println("extracted xStr " + xStr);
 
@@ -328,19 +319,6 @@ public class ROVER_15 {
 		}
 		return null;
 	}
-	
-	/* TODO: Keep track of how much time is remaining on the clock.*/
-	long startTime;
-	long currentTime;
-	
-	startTime = 100;  // Hard-coded for now
-	currentTime = System.currentTimeMillis();
-	
-	System.out.println("Elapsed time was " + (currentTime - startTime) + " milliseconds.");
-	}
-
-	
-	/* TODO: Always calculate MANHATTAN distance from "Home". If time remaining is >= distance from home, send rover home */
 	
 	
 
