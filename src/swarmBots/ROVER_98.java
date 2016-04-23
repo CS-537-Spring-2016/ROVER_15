@@ -193,8 +193,7 @@ public class ROVER_98 {
 					
 	
 					if (goingEast) {
-						// check scanMap to see if path is blocked to the east
-						// (scanMap may be old data by now)
+						// Checks to see if there is science on current tile, if not it moves East
 						System.out.println("ROVER_98: scanMapTiles[centerIndex][centerIndex].getScience().getSciString() " + scanMapTiles[centerIndex][centerIndex].getScience().getSciString());
 						if (!scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("N")) {
 							System.out.println("ROVER_98 request GATHER");

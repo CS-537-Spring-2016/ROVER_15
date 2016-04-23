@@ -163,7 +163,6 @@ public class SwarmMapInit {
 					String rName = "ROVER_" + tstr;
 					
 					roverLocations.putRover(RoverName.getEnum(rName), new Coord(i, yPos));
-					System.out.println("MapInit: " + rName + " at (" + i + ", " + yPos + ")" );
 				} else if (tstr.startsWith("__") || tstr.startsWith("  ")) {
 					// do nothing
 					
@@ -286,10 +285,7 @@ public class SwarmMapInit {
 	public static Coord extractCoord(String inputString) {
 		if (inputString.lastIndexOf(" ") != -1) {
 			String xPosStr = inputString.substring(0, inputString.indexOf(" "));
-			System.out.println("MapInit: extracted xPosStr " + xPosStr);
-
 			String yPosStr = inputString.substring(inputString.indexOf(" ") +1, inputString.lastIndexOf(" "));
-			System.out.println("MapInit: extracted yPosStr " + yPosStr);
 			return new Coord(Integer.parseInt(xPosStr), Integer.parseInt(yPosStr));
 		}
 		return null;

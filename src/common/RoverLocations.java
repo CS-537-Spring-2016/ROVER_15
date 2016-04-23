@@ -58,7 +58,6 @@ public class RoverLocations {
 	}
 	
 	public synchronized void putRover(RoverName rname, Coord rloc){	
-		System.out.println("RoverLocation: putting in hash rname and rloc " + rname.toString() + "  " + rloc.toString());
 		roverHash.put(rname, rloc);
 	}
 	
