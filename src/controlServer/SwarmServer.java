@@ -208,6 +208,7 @@ public class SwarmServer {
                    	
                     if(roverServerRequestsPerSecond > CALLS_PER_SECOND_LIMIT){
                     	System.out.println("SWARM_"+roverNameString+ "_thread: too many requests per second - dropping connection");
+                    	in.close();
                     	socket.close();
                     }
                     
