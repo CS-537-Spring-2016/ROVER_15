@@ -1,1 +1,26 @@
+<<<<<<< HEAD
+/bin/
+=======
+# Ignore everything
+*
+
+# But not these files...
+!.gitignore
+
+!src
+!src/
+!src/*
+!src/*/
+!src/*/*
+
+!libs
+!libs/
+!libs/*
+!libs/*/
+!libs/*/*
+
+!*.txt
+>>>>>>> e1493424b08d522ac02075841608ac552bc8d69d
+/bin/
+/bin/
 /bin/
