@@ -77,7 +77,9 @@ public class SwarmServer {
     
  // length of a side of the scan map array !!! must be odd number !!!
     static final int STANDARD_SCANMAP_RANGE = 7;
+
     static final int BOOSTED_SCANMAP_RANGE = 11; // range extender increased to 11 by popular demand
+
     
     /**
      * The application main method, which just listens on a port and
