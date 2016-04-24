@@ -149,6 +149,9 @@ public class SwarmMapInit {
 		// line 6 - skip past the column number lines
 		bufRead.readLine();
 		
+		// line 7 - skip past the top row of underline characters
+		bufRead.readLine();
+		
 		this.planetMap = new PlanetMap(this.mapWidth, this.mapHeight, startPos, targetPos);
 		
 		double yCount = 0.0;
@@ -216,9 +219,12 @@ public class SwarmMapInit {
 	public String makeInitString(){
 		StringBuilder printMap = new StringBuilder();
 		printMap.append(this.mapName + "\n");
-		printMap.append(this.planetMap.getWidth() + " " + this.planetMap.getHeight() + " Map_Width_Height\n");
-		printMap.append(planetMap.getStartPosition().xpos + " " + planetMap.getStartPosition().ypos + " StartPosition(x,y)\n");
-		printMap.append(planetMap.getTargetPosition().xpos + " " + planetMap.getTargetPosition().ypos + " TargetPosition(x,y)\n");
+		printMap.append(this.planetMap.getWidth() + " " 
+							+ this.planetMap.getHeight() + " Map_Width_Height\n");
+		printMap.append(planetMap.getStartPosition().xpos + " " 
+							+ planetMap.getStartPosition().ypos + " StartPosition(x,y)\n");
+		printMap.append(planetMap.getTargetPosition().xpos + " " 
+							+ planetMap.getTargetPosition().ypos + " TargetPosition(x,y)\n");
 		
 		printMap.append("KEY:<Terrain> R = Rock; G = Gravel; S = Sand; X = abyss;  <Science> Y = Radioactive; C = Crystal; M = Mineral; O = Organic; <Rover> ##\n");
 		

@@ -244,14 +244,14 @@ class MyGUIWorker2 extends SwingWorker<Void, String> {
 		Coord targetPos = planetMap.getTargetPosition();
 		int targPos_x = targetPos.xpos;
 		int targPos_y = targetPos.ypos;
-		int startOffset = planetMap.START_LOCATION_SIZE / 2;
-		int targetOffset = planetMap.TARGET_LOCATION_SIZE / 2;
+		int startOffset = PlanetMap.START_LOCATION_SIZE / 2;
+		int targetOffset = PlanetMap.TARGET_LOCATION_SIZE / 2;
 			
-		minSafePos_x = Math.max(strtPos_x - startOffset, 0) ;
-		maxSafePos_x = Math.min(strtPos_x + startOffset, planetMap.getWidth()) ;
-		minSafePos_y = Math.max(strtPos_y - startOffset, 0) ;
-		maxSafePos_y = Math.min(strtPos_y + startOffset, planetMap.getHeight()) ;
-		boxSize = planetMap.START_LOCATION_SIZE;
+		minSafePos_x = Math.max(strtPos_x - startOffset, 0);
+		maxSafePos_x = Math.min(strtPos_x + startOffset, planetMap.getWidth());
+		minSafePos_y = Math.max(strtPos_y - startOffset, 0);
+		maxSafePos_y = Math.min(strtPos_y + startOffset, planetMap.getHeight());
+		boxSize = PlanetMap.START_LOCATION_SIZE;
 		boxColor = Color.MAGENTA;
 		
 		lineSegmentArrayList.add(
@@ -267,11 +267,11 @@ class MyGUIWorker2 extends SwingWorker<Void, String> {
 				new LineSegment((maxSafePos_x * tileSize) + tileSize, (maxSafePos_x * tileSize) + tileSize,  minSafePos_y * tileSize,  (maxSafePos_y  * tileSize) + tileSize,  boxColor));
 
 		
-		minSafePos_x = Math.max(targPos_x - startOffset, 0) ;
-		maxSafePos_x = Math.min(targPos_x + startOffset, planetMap.getWidth() -1) ;
-		minSafePos_y = Math.max(targPos_y - startOffset, 0) ;
-		maxSafePos_y = Math.min(targPos_y + startOffset, planetMap.getHeight() -1) ;
-		boxSize = planetMap.TARGET_LOCATION_SIZE;
+		minSafePos_x = Math.max(targPos_x - targetOffset, 0) ;
+		maxSafePos_x = Math.min(targPos_x + targetOffset, planetMap.getWidth() -1) ;
+		minSafePos_y = Math.max(targPos_y - targetOffset, 0) ;
+		maxSafePos_y = Math.min(targPos_y + targetOffset, planetMap.getHeight() -1) ;
+		boxSize = PlanetMap.TARGET_LOCATION_SIZE;
 		boxColor = Color.RED;
 		
 		lineSegmentArrayList.add(
