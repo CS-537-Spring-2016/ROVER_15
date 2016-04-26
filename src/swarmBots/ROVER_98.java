@@ -171,7 +171,7 @@ public class ROVER_98 {
 				// ***** do a SCAN *****
 
 				// gets the scanMap from the server based on the Rover current location
-				loadScanMapFromSwarmServer();
+				doScan();
 				// prints the scanMap to the Console output for debug purposes
 				scanMap.debugPrintMap();
 				
@@ -305,7 +305,7 @@ public class ROVER_98 {
 	
 
 	// sends a SCAN request to the server and puts the result in the scanMap array
-	public void loadScanMapFromSwarmServer() throws IOException {
+	public void doScan() throws IOException {
 		//System.out.println("ROVER_98 method doScan()");
 		Gson gson = new GsonBuilder()
     			.setPrettyPrinting()

@@ -51,14 +51,14 @@ public class GUIdisplay3 extends JPanel implements MyGUIAppendable3 {
 	public GUIdisplay3() {
 	}
 
-	public GUIdisplay3(int width, int height) {
+	public GUIdisplay3(int width, int height, long timeLimit) {
 		this.width = width;
 		this.height = height;
 		this.pixelWidth = (this.width * TILE_SIZE);
 		this.pixelHeight = (this.height * TILE_SIZE);
 		graphicTiles = new ArrayList<>();
 		lineSegments = new ArrayList<>();
-		countDownClock();
+		countDownClock(timeLimit);
 		displayScoreTextInit();
 	}
 
@@ -95,7 +95,7 @@ public class GUIdisplay3 extends JPanel implements MyGUIAppendable3 {
 	 * to-zero-by-swing-timer
 	 */
 
-	private void countDownClock() {
+	private void countDownClock(long timeLimit) {
 		// Count down clock
 		countdownTitle = new JTextField();
 		countdownTitle.setFont(new Font("sansserif", Font.PLAIN, FONT_SIZE));
@@ -114,7 +114,7 @@ public class GUIdisplay3 extends JPanel implements MyGUIAppendable3 {
 		// create a 1 seconds delay
 		timer = new Timer(1000, new ActionListener() {
 			// private long time = 60 * 1000; //60 seconds
-			private long time = 600 * 1000; // 10 minutes
+			private long time = timeLimit; // 10 minutes
 
 			public void actionPerformed(ActionEvent e) {
 				if (time >= 0) {
