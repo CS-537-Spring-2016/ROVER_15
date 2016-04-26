@@ -64,6 +64,9 @@ public class SwarmServer {
 	
     static GUIdisplay2 mainPanel2;
 	static MyGUIWorker2 myWorker2;
+	
+	static GUIdisplay3 mainPanel3;
+	static MyGUIWorker3 myWorker3;
     
 	// These are the velocity or speed values for the different drive systems
 	// Changes these as necessary for good simulation balance
@@ -112,11 +115,16 @@ public class SwarmServer {
 		mainPanel2 = new GUIdisplay2(mapWidth, mapHeight);
 		myWorker2 = new MyGUIWorker2(mainPanel2);
 		
+		mainPanel3 = new GUIdisplay3(mapWidth, mapHeight);
+		myWorker3 = new MyGUIWorker3(mainPanel3);
+		
+		
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				// currently sending it when calling the updateGUIDisplay() method
 //**			GUIdisplay.createAndShowGui(myWorker, mainPanel);
-				GUIdisplay2.createAndShowGui(myWorker2, mainPanel2);
+				//GUIdisplay2.createAndShowGui(myWorker2, mainPanel2);
+				GUIdisplay3.createAndShowGui(myWorker3, mainPanel3);
 				try {
 					updateGUIDisplay();
 				} catch (Exception e) {
@@ -328,6 +336,7 @@ public class SwarmServer {
 	                    			System.out.println("SwarmServer: corp " + getCorpNumber(rover) + " total science = " + corpCollectedScience.get(getCorpNumber(rover)).size());
 	                    		}
 	                    	}
+	                    	scoreDisplayUpdate();
                     	} //END synchronized lock
                  	
                     	
@@ -759,7 +768,12 @@ public class SwarmServer {
 		//myWorker.displayRovers(roverLocations);
 		//myWorker.displayActivity(roverLocations, scienceLocations);
 		//myWorker.displayFullMap(roverLocations, scienceLocations, planetMap);
-		myWorker2.displayFullMap(roverLocations.clone(), scienceLocations, planetMap);
+		//myWorker2.displayFullMap(roverLocations.clone(), scienceLocations, planetMap);
+		myWorker3.displayFullMap(roverLocations.clone(), scienceLocations, planetMap);
+	}
+	
+	static void scoreDisplayUpdate() throws Exception{
+		myWorker3.displayScore(corpCollectedScience);
 	}
 	
 	// sad face - more hard coded bs
