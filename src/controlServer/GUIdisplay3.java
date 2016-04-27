@@ -373,8 +373,8 @@ class MyGUIWorker3 extends SwingWorker<Void, String> {
 	}
 
 	public void displayScore(ArrayList<ArrayList<Science>> corpCollectedScience) {
-		String tempGreenScore = Integer.toString(corpCollectedScience.get(1).size());
-		String tempBlueScore = Integer.toString(corpCollectedScience.get(2).size());
+		String tempBlueScore = Integer.toString(corpCollectedScience.get(1).size());
+		String tempGreenScore = Integer.toString(corpCollectedScience.get(2).size());
 		String tempSampleScore = Integer.toString(corpCollectedScience.get(0).size());
 		myAppendable.setScores(tempBlueScore, tempGreenScore, tempSampleScore);
 	}
