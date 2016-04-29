@@ -1,3 +1,4 @@
+
 package swarmBots;
 
 
@@ -24,10 +25,11 @@ import enums.Terrain;
  * http://cs.lmu.edu/~ray/notes/javanetexamples/ Many thanks to the authors for
  * publishing their code examples
  * 
- * ROVER_15  Spec:	Drive = wheels, Tool 1 = spectral sensor, Tool 2 = range extender
+ * ROVER_15  Spec:	Drive = treaders, Tool 1 = Harvester/Excavator, Tool 2 = Driller
  */
 
-public class ROVER_15 {
+public class ROVER_15 
+{
 
 	BufferedReader in;
 	PrintWriter out;
@@ -94,9 +96,9 @@ public class ROVER_15 {
 		cardinals[2] = "S";
 		cardinals[3] = "W";
 
-		String currentDir = cardinals[0];
-		Coord currentLoc = null;
-		Coord previousLoc = null;
+		String currentDir = cardinals[0]; // currentDir is current direction
+		Coord currentLoc = null; //initially null
+		Coord previousLoc = null; // initially null
 
 		// start Rover controller process
 		while (true) {
@@ -123,7 +125,8 @@ public class ROVER_15 {
 			
 			
 			
-			// **** get equipment listing ****			
+			// **** get equipment listing ****
+			
 			ArrayList<String> equipment = new ArrayList<String>();
 			equipment = getEquipment();
 			//System.out.println("ROVER_15 equipment list results drive " + equipment.get(0));
@@ -309,7 +312,9 @@ public class ROVER_15 {
 	// this takes the LOC response string, parses out the x and x values and
 	// returns a Coord object
 	public static Coord extractLOC(String sStr) {
+		System.out.println("Value of sStr before substring= "+sStr);
 		sStr = sStr.substring(4);
+		System.out.println("Value of sStr after substring= "+sStr);
 		if (sStr.lastIndexOf(" ") != -1) {
 			String xStr = sStr.substring(0, sStr.lastIndexOf(" "));
 			//System.out.println("extracted xStr " + xStr);

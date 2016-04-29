@@ -330,7 +330,7 @@ public class SwarmServer {
                     			.create();
                     	// return contents of scienceCargo
                     	String jsonCargoList = gson.toJson(rover.scienceCargo);
-                    	
+                    	System.out.println(jsonCargoList);
                     	out.println("CARGO"); //returns command header as check
                     	
                     	// return an ArrayList of rover equipment - json string?
@@ -490,7 +490,9 @@ public class SwarmServer {
 		    		//check planetMap (immutable)
 		    		MapTile possibleMovetoTile = planetMap.getTile(xCurrentPos, yCurrentPos);
 			    		if(possibleMovetoTile.getTerrain() != Terrain.ROCK && possibleMovetoTile.getTerrain() != Terrain.NONE){
+			    			
 				    		// Move to the new map square, unless occupied by another rover
+			    			System.out.println("drill the rock");
 				    		if(roverLocations.moveRover(thisRover.getRoverName(), new Coord(xCurrentPos, yCurrentPos))){
 				    			// if moveRover call is successful then update latest move time value
 				    			thisRover.updateMoveTime();
