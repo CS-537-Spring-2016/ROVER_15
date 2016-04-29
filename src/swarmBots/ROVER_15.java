@@ -124,8 +124,7 @@ public class ROVER_15 {
 			
 			
 			// **** get equipment listing ****
-			// **** get equipment listing ****
-			// **** get equipment listing ****
+			
 			ArrayList<String> equipment = new ArrayList<String>();
 			equipment = getEquipment();
 			//System.out.println("ROVER_15 equipment list results drive " + equipment.get(0));
