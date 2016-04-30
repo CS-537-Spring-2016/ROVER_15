@@ -124,6 +124,7 @@ public class ROVER_15 {
 			previousLoc = currentLoc;
 
 			// **** finding jackpot ****
+			// TODO: Verify that target location can be found here and parsing the coordinates is accurate
 			out.println("TARGET_LOC");
 			tline = in.readLine();
 			if (tline == null) {
@@ -350,6 +351,7 @@ public class ROVER_15 {
 		}
 		return null;
 	}
+	
 
 	// one of the motion dictating method (will be moved and adjusted to the appropriate location)
 	public void zigzagMotion(double[][] dct,
