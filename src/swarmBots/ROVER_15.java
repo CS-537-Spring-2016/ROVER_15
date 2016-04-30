@@ -348,10 +348,15 @@ public class ROVER_15
 		}
 	}
 	
+	// location of stuck roar
+	
 	public String locOfStuck(int start,int end)
 	{
 		int i = start;
 		int j = end;
+		
+		
+		
 		return "";
 	}
 
