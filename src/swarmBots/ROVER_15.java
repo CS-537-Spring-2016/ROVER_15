@@ -146,7 +146,9 @@ public class ROVER_15
 			// ***** MOVING *****
 			// try moving east 5 block if blocked
 			if (blocked) {
+				System.out.println("blocked - karo kuch");
 				for (int i = 0; i < 5; i++) {
+					out.println("Moving to EAST");
 					out.println("MOVE E");
 					//System.out.println("ROVER_15 request move E");
 					Thread.sleep(300);
@@ -184,6 +186,7 @@ public class ROVER_15
 							|| scanMapTiles[centerIndex][centerIndex -1].getTerrain() == Terrain.ROCK
 							|| scanMapTiles[centerIndex][centerIndex -1].getTerrain() == Terrain.NONE) {
 						blocked = true;
+						
 					} else {
 						// request to server to move
 						out.println("MOVE N");
@@ -211,7 +214,6 @@ public class ROVER_15
 
 			//System.out.println("ROVER_15 stuck test " + stuck);
 			System.out.println("ROVER_15 blocked test " + blocked);
-
 			// TODO - logic to calculate where to move next
 
 			
@@ -312,9 +314,7 @@ public class ROVER_15
 	// this takes the LOC response string, parses out the x and x values and
 	// returns a Coord object
 	public static Coord extractLOC(String sStr) {
-		System.out.println("Value of sStr before substring= "+sStr);
-		sStr = sStr.substring(4);
-		System.out.println("Value of sStr after substring= "+sStr);
+		sStr = sStr.substring(4);		
 		if (sStr.lastIndexOf(" ") != -1) {
 			String xStr = sStr.substring(0, sStr.lastIndexOf(" "));
 			//System.out.println("extracted xStr " + xStr);

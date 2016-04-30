@@ -601,6 +601,8 @@ public class SwarmServer {
 				    		} else {
 				    			//System.out.println("no move south, rover in the way"); //debug status out
 				    		}
+				    		if(moveThere.getTerrain()==Terrain.ROCK )
+				    			System.out.println("Rock detected");
 			    		}
 	    			}
 	    			
