@@ -153,7 +153,7 @@ public class ROVER_15 {
 					blocked = true;
 					counter = 0;
 				}		
-				else if(counter > 10){
+				else if(counter > 40){
 					blocked = true;
 					counter = 0;
 				}
