@@ -153,7 +153,7 @@ public class ROVER_15 {
 					blocked = true;
 					counter = 0;
 				}		
-				else if(counter > 10){
+				else if(counter > 40){
 					blocked = true;
 					counter = 0;
 				}
@@ -234,7 +234,7 @@ public class ROVER_15 {
 	private int getRandomDirection(int current) {
 		Random r = new Random();
 		int Low = 0;
-		int High = 3;
+		int High = 4;
 		int Result = current;
 		goingNESW[current] = false;
 		
