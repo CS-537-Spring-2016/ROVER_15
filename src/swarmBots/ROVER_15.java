@@ -125,16 +125,12 @@ public class ROVER_15 {
 
 			// **** finding jackpot ****
 			// TODO: Verify that target location can be found here and parsing the coordinates is accurate
-			out.println("TARGET_LOC");
-			tline = in.readLine();
-			if (tline == null) {
-				System.out.println("ROVER_15 can't find target location");
-				tline = "";
-			}
-			if (tline.startsWith("TARGET_LOC")) {
-				targetLoc = extractTARGET_LOC(tline);
+			
+			if (line.startsWith("TARGET")) {
+				targetLoc = (Coord) extractTARGET_LOC(line);
 			}
 			System.out.println("ROVER_15 targetLoc: " + targetLoc);
+			System.out.println("JACKPOT!");
 
 
 
@@ -322,10 +318,13 @@ public class ROVER_15 {
 	}
 
 
+	
+	
 	// this takes the LOC response string, parses out the x and x values and
 	// returns a Coord object
 	public static Coord extractLOC(String sStr) {
 		sStr = sStr.substring(4);
+		System.out.println("WHAT ARE YOU?" + sStr);
 		if (sStr.lastIndexOf(" ") != -1) {
 			String xStr = sStr.substring(0, sStr.lastIndexOf(" "));
 			//System.out.println("extracted xStr " + xStr);
