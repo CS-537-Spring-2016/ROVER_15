@@ -307,7 +307,7 @@ public class ROVER_15 {
 		
 		if(jsonScanMapIn.startsWith("SCAN")){	
 			while (!(jsonScanMapIn = in.readLine()).equals("SCAN_END")) {
-				//System.out.println("ROVER_15 incomming SCAN result: " + jsonScanMapIn);
+				//System.out.println("ROVER_15 incoming SCAN result: " + jsonScanMapIn);
 				jsonScanMap.append(jsonScanMapIn);
 				jsonScanMap.append("\n");
 				//System.out.println("ROVER_15 doScan() bottom of while");
