@@ -314,7 +314,7 @@ public class ROVER_15
 
 	// this takes the LOC response string, parses out the x and x values and
 	// returns a Coord object
-	public static Coord extractLOC(String sStr) {
+	/* public static Coord extractLOC(String sStr) {
 		System.out.println("Value of sStr before substring= "+sStr);
 		sStr = sStr.substring(4);
 		System.out.println("Value of sStr after substring= "+sStr);
@@ -327,7 +327,35 @@ public class ROVER_15
 			return new Coord(Integer.parseInt(xStr), Integer.parseInt(yStr));
 		}
 		return null;
+	
 	}
+	 */
+	 
+	
+	/// retuns coord object and the loc reponse , parse out the line x and values
+	 public static Coord extractLOC(String sStr) {
+		
+		  if(sStr != null && sStr.contains(" ")){
+			  
+			  String[] tokens = sStr.split("\\s",-1 );
+			  if(tokens.length > 2){
+				  int x = 0 , y = 0 ;
+				  try{
+					  x = Integer.parseInt(tokens[1]);
+					  y = Integer.parseInt(tokens[2]);
+					  
+					  return new Coord(x,y);
+				  }
+				  catch(NumberFormatException nfe){
+					  
+					  System.out.println("Invalid number");
+				  }
+			  }
+		  }
+		  return null;
+		
+		}
+	 
 	
 	// one of the motion dictating method (will be moved and adjusted to the appropriate location)
 	public void zigzagMotion(double[][] dct,
