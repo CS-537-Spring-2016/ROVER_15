@@ -203,11 +203,35 @@ public class ROVER_15 {
 		out.println("LOC");
 		line = in.readLine();
 		Coord currentLocation = extractLOC(line);
-		out.println("TARGET_LOC");
-		line = in.readLine();
-		Coord targetLocation = extractTargetLOC(line);
+		//out.println("TARGET_LOC");
+		//line = in.readLine();
+		//Coord targetLocation = extractTargetLOC(line);
+		Coord targetLocation = new Coord (5, 16);
 		pqTargets.add(targetLocation);
 		
+		
+		// now our Rover Would have reached the target location by this line.
+		if((currentLocation.ypos == targetLocation.ypos) && (currentLocation.xpos == targetLocation.xpos)){
+			// collect science. Ran out of time in class. TODO: Finish
+			out.println("GATHER");
+			line = in.readLine();
+			
+			// remove target we arrived at from target queue
+			// TODO: remove target from global map so other rovers don't come to it
+			pqTargets.poll();
+			
+			// if target queue is empty, go to a random coordinate within map. else set new target location from queue
+			if (pqTargets.size() == 0){
+//				int maxMapLength = scanMap.getEdgeSize();  // is the map always going to be square?
+//				int randomNuminRange = getRandom(maxMapLength);
+//				Coord randomCoord = new Coord(randomNuminRange, randomNuminRange);
+				Coord randomCoord = new Coord(30, 30);
+				targetLocation = randomCoord;
+			} else {
+				targetLocation = pqTargets.peek();
+			}
+			
+		}
 		if(currentLocation.xpos < targetLocation.xpos){
 			possibleDirections.add(1);
 		}
@@ -221,28 +245,7 @@ public class ROVER_15 {
 			possibleDirections.add(0);
 		}
 		
-		// now our Rover Would have reached the target location by this line.
-		if((currentLocation.ypos == targetLocation.ypos) && (currentLocation.xpos == targetLocation.xpos)){
-			// TODO: Krish, will write the code for collecting data science
-			
-			// remove target we arrived at from target queue
-			// TODO: remove target from global map so other rovers don't come to it
-			pqTargets.poll();
-//			for (Coord x : pqTargets){
-//				System.err.println(x);
-//			}
-			
-			// if target queue is empty, go to a random coordinate within map. else set new target location from queue
-			if (pqTargets == null){
-				int maxMapLength = scanMap.getEdgeSize();  // is the map always going to be square?
-				int randomNuminRange = getRandom(maxMapLength);
-				Coord randomCoord = new Coord(randomNuminRange, randomNuminRange);
-				targetLocation = randomCoord;
-			} else {
-				targetLocation = pqTargets.peek();
-			}
-			
-		}
+	
 		
 		return possibleDirections;
 	}
