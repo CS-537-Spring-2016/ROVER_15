@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import com.google.gson.Gson;
@@ -91,6 +92,7 @@ public class ROVER_15 {
 		boolean stuck = false; // just means it did not change locations between requests,
 								// could be velocity limit or obstruction etc.
 		boolean blocked = false;
+		boolean blocked_byNothing = false;
 		
 
 		int currentDir = 3;
@@ -136,8 +138,10 @@ public class ROVER_15 {
 			this.doScan();
 			scanMap.debugPrintMap();
 			
+			// Coord obj =  extractTargetLOC(sStr);
 			//Driller Moving Logic
-			
+			out.println("TARGET_LOC");
+			line = in.readLine();
 			// pull the MapTile array out of the ScanMap object
 			MapTile[][] scanMapTiles = scanMap.getScanMap();
 			int centerIndex = (scanMap.getEdgeSize() - 1)/2;
@@ -145,7 +149,14 @@ public class ROVER_15 {
 			
 			if(blocked){
 				currentDir = getRandomDirection(currentDir);
+				blocked = false;
 				counter = 0;
+			}
+			else if(blocked_byNothing){
+				List<Integer> allowedDirections = getDirectionsToTargetLocation();
+				currentDir = getRandomDirection(currentDir,allowedDirections);
+				counter = 0;
+				blocked_byNothing = false;
 			}
 			
 			if(goingNESW[currentDir]){
@@ -153,8 +164,8 @@ public class ROVER_15 {
 					blocked = true;
 					counter = 0;
 				}		
-				else if(counter > 40){
-					blocked = true;
+				else if(counter > 10){
+					blocked_byNothing = true;
 					counter = 0;
 				}
 				else{
@@ -189,6 +200,32 @@ public class ROVER_15 {
 
 		}
 
+	}
+
+	private List<Integer> getDirectionsToTargetLocation() throws IOException {
+		String line = "";
+		List<Integer> possibleDirections = new ArrayList<Integer>();
+		out.println("LOC");
+		line = in.readLine();
+		Coord currentLocation = extractLOC(line);
+		out.println("TARGET_LOC");
+		line = in.readLine();
+		Coord targetLocation = extractTargetLOC(line);
+		
+		if(currentLocation.xpos < targetLocation.xpos){
+			possibleDirections.add(1);
+		}
+		else if(currentLocation.xpos > targetLocation.xpos){
+			possibleDirections.add(3);
+		}
+		if(currentLocation.ypos < targetLocation.ypos){
+			possibleDirections.add(2);
+		}
+		else if(currentLocation.xpos > targetLocation.ypos){
+			possibleDirections.add(0);
+		}
+		
+		return possibleDirections;
 	}
 
 	private boolean roverStuckIncurrentDir(int currentDir, MapTile[][] scanMapTiles, int centerIndex) {
@@ -231,14 +268,28 @@ public class ROVER_15 {
 
 	// ################ Support Methods ###########################
 	
-	private int getRandomDirection(int current) {
+	public int getRandomDirection(int current) {
 		Random r = new Random();
 		int Low = 0;
-		int High = 3;
+		int High = 4;
 		int Result = current;
 		goingNESW[current] = false;
 		
 		while (current == Result){
+			Result = r.nextInt(High-Low) + Low;
+		}
+		goingNESW[Result] = true;
+		return Result;
+	}
+	
+	public int getRandomDirection(int current, List<Integer> allowedDirections  ) {
+		Random r = new Random();
+		int Low = 0;
+		int High = 4;
+		int Result = current;
+		goingNESW[current] = false;
+		
+		while ((! allowedDirections.contains(Result)) || Result == current){
 			Result = r.nextInt(High-Low) + Low;
 		}
 		goingNESW[Result] = true;
@@ -343,6 +394,19 @@ public class ROVER_15 {
 		}
 		return null;
 	}
+	
+	public static Coord extractTargetLOC(String sStr) {
+        sStr = sStr.substring(11);
+        if (sStr.lastIndexOf(" ") != -1) {
+            String xStr = sStr.substring(0, sStr.lastIndexOf(" "));
+            // System.out.println("extracted xStr " + xStr);
+
+            String yStr = sStr.substring(sStr.lastIndexOf(" ") + 1);
+            // System.out.println("extracted yStr " + yStr);
+            return new Coord(Integer.parseInt(xStr), Integer.parseInt(yStr));
+        }
+        return null;
+    }
 	
 	
 
