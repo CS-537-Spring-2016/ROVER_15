@@ -6,6 +6,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Random;
 
 import common.Coord;
 import common.MapTile;
@@ -41,6 +44,24 @@ public class PaintMapUtility {
 	private int mapWidth;
 	private int mapHeight;
 	private PlanetMap planetMap;
+	
+	int numRock;
+	int numSand;
+	int numGravel;
+	int numSoil;
+	int numVoid;
+	
+	int numCrystal;
+	int numRadioactive;
+	int numOrganic;
+	int numMineral;
+	
+	int[] rockScience = {0, 0, 0, 0};
+	int[] soilScience = {0, 0, 0, 0};
+	int[] gravelScience = {0, 0, 0, 0};
+	int[] sandScience = {0, 0, 0, 0};
+	
+	ArrayList<String> randomRover;
 
 
 	public void parseInputFromMaintMapFiles(String fileName) throws IOException {
@@ -50,6 +71,27 @@ public class PaintMapUtility {
 		String terrainMapFileName;
 		String scienceMapFileName;
 		String inputLine;
+		
+		// for keeping track of stats
+		numRock = 0;
+		numSand = 0;
+		numGravel = 0;
+		numSoil = 0;
+			
+		numCrystal = 0;
+		numRadioactive = 0;
+		numOrganic = 0;
+		numMineral = 0;
+		
+		randomRover = new ArrayList<String>();
+		
+		for(int i = 1; i < 10; i++){
+			String roverNumber = "0" + Integer.toString(i);
+			randomRover.add(roverNumber);
+			randomRover.add(Integer.toString(i + 9));
+		}
+		
+		Random randomNum = new Random();
 		
 		FileReader inputPaintMapInfo = new FileReader(fileName);
 		BufferedReader bufRead_mapInfo = new BufferedReader(inputPaintMapInfo);
@@ -110,13 +152,6 @@ public class PaintMapUtility {
 			int sciNextSpaceIndex = sciInput.indexOf(" ", sciSpaceIndex +1);
 			
 			for (int i = 0; i < mapWidth; i++) {
-				// row 0
-				// pull pixel rgb values as substring
-				// grab three integer values at a time from the input line
-				// each value can be 1 to 3 digits long
-				// if next whitespace location exists read substring up to white space.
-				// convert to red integer value
-				// 
 				
 				
 				String tempStr;
@@ -142,21 +177,20 @@ public class PaintMapUtility {
 				System.out.println("_B_" + tempStr);
 				
 				spaceIndex = nextSpaceIndex +1;
-				nextSpaceIndex = inputLine.indexOf(" ", spaceIndex +1);
+				nextSpaceIndex = inputLine.indexOf(" ", spaceIndex +1);		
 				
-				//System.out.println(new Color(R,G,B).toString());
-				//System.out.println("color to letter= " + getLetterFromColor(new Color(R,G,B)));
+				String terrainColorToLetter = getLetterFromColor(new Color(R,G,B));
 				
-				
-				String colorToLetter = getLetterFromColor(new Color(R,G,B));
-				
-				if(colorToLetter.equals("N") || colorToLetter.equals("R") || colorToLetter.equals("S") || colorToLetter.equals("G")){
-					System.out.println("add to planet " + colorToLetter);
-					planetMap.setTile(new MapTile(getLetterFromColor(new Color(R,G,B))), i, yPos);
+				if(terrainColorToLetter.equals("N") || terrainColorToLetter.equals("R") || terrainColorToLetter.equals("S")
+													|| terrainColorToLetter.equals("G") || terrainColorToLetter.equals("X")){
+					System.out.println("add to planet " + terrainColorToLetter);
+					planetMap.setTile(new MapTile(terrainColorToLetter), i, yPos);
+					incrementTerrainCount(terrainColorToLetter);
 				}
-
-
-						
+					
+				
+				
+				
 				String sciTempStr;
 				// next location
 				sciTempStr = sciInput.substring(sciSpaceIndex, sciNextSpaceIndex);				
@@ -180,36 +214,123 @@ public class PaintMapUtility {
 				sciSpaceIndex = sciNextSpaceIndex +1;
 				sciNextSpaceIndex = sciInput.indexOf(" ", sciSpaceIndex +1);
 				
-				colorToLetter = getLetterFromColor(new Color(sR,sG,sB));
+				String scienceColorToLetter = getLetterFromColor(new Color(sR,sG,sB));
 				
-				if(colorToLetter.equals("Y") || colorToLetter.equals("M") || colorToLetter.equals("C") || colorToLetter.equals("O")){
-					System.out.print("add to science " + colorToLetter);
-					scienceLocations.putScience(new Coord(i, yPos), Science.getEnum(colorToLetter));
+				if(scienceColorToLetter.equals("Y") || scienceColorToLetter.equals("M") || scienceColorToLetter.equals("C") || scienceColorToLetter.equals("O")){
+					System.out.print("add to science " + scienceColorToLetter);
+					scienceLocations.putScience(new Coord(i, yPos), Science.getEnum(scienceColorToLetter));
+					incrementScienceCounts(scienceColorToLetter, terrainColorToLetter);
 				}
 				
 				
-				if(sR == 100 && sG == 100 && sB>=100 && sB<200 ){
+				if(sR == 100 && sG == 100 && sB>=101 && sB<119 ){
+					System.out.println("Integer.toString(sB) " + (Integer.toString(sB)));
+					System.out.println("Integer.toString(sB) " + (Integer.toString(sB)).substring(1));
+					//String rName = "ROVER_" + Integer.toString(sB).substring(1);
+					int getIndex = randomNum.nextInt(randomRover.size());
+					String rName = "ROVER_" + randomRover.get(getIndex);
+					randomRover.remove(getIndex);
+					System.out.println("found rover= " + rName);
+					
+					roverLocations.putRover(RoverName.getEnum(rName), new Coord(i, yPos));
+				}
+				
+				//setup the sample rovers
+				if(sR == 100 && sG == 100 && (sB==100 || (sB>118 && sB<200)) ){
 					System.out.println("Integer.toString(sB) " + (Integer.toString(sB)));
 					System.out.println("Integer.toString(sB) " + (Integer.toString(sB)).substring(1));
 					String rName = "ROVER_" + Integer.toString(sB).substring(1);
 					System.out.println("found rover= " + rName);
+					
 					roverLocations.putRover(RoverName.getEnum(rName), new Coord(i, yPos));
 				}
+				
 				
 				System.out.println("---------------------------");
 			}
 			yPos++;
 		}
+		printStatistics();
 	}
 	
 	
+	private void printStatistics() {
+		System.out.println("Map statistics");
+		System.out.println("Soil terrain= " + numSoil);
+		System.out.println("Rock terrain= " + numRock);
+		System.out.println("Sand terrain= " + numSand);
+		System.out.println("Gravel terrain= " + numGravel);
+		System.out.println("Void terrain= " + numVoid);
+		System.out.println("");
+		System.out.println("Science     | Rock | Sand | Soil | Gravel");
+		System.out.println("Crystal     |  " + rockScience[0] + "  |  " + sandScience[1] + "  |  " + soilScience[2] + "  |  " + gravelScience[3]);
+		System.out.println("Radioactive |  " + rockScience[0] + "  |  " + sandScience[1] + "  |  " + soilScience[2] + "  |  " + gravelScience[3]);
+		System.out.println("Organic     |  " + rockScience[0] + "  |  " + sandScience[1] + "  |  " + soilScience[2] + "  |  " + gravelScience[3]);
+		System.out.println("Mineral     |  " + rockScience[0] + "  |  " + sandScience[1] + "  |  " + soilScience[2] + "  |  " + gravelScience[3]);
+		System.out.println("");
+		System.out.println("Total Cryatal= " + numCrystal);
+		System.out.println("Total Radioactive= " + numRadioactive);
+		System.out.println("Total Organic= " + numOrganic);
+		System.out.println("Total Mineral= " + numMineral);
+		
+	}
+
+
+	private void incrementScienceCounts(String scienceColorToLetter, String terrainColorToLetter) {
+		int sciIndex = 0;
+		switch(scienceColorToLetter){
+			case "Y": sciIndex = 0; numRadioactive++; break;
+			case "M": sciIndex = 1; numMineral++; break;
+			case "O": sciIndex = 2; numOrganic++; break;
+			case "C": sciIndex = 3; numCrystal++; break;
+		}
+		
+		switch(terrainColorToLetter){
+			case "R":
+				rockScience[sciIndex]++;
+				break;
+			case "S":
+				sandScience[sciIndex]++;
+				break;
+			case "N":
+				soilScience[sciIndex]++;
+				break;
+			case "G":
+				gravelScience[sciIndex]++;
+				break;
+		}
+	}
+
+
+	private void incrementTerrainCount(String terrainColorToLetter) {	
+		switch(terrainColorToLetter){
+			case "R":
+				numRock++;
+				break;
+			case "S":
+				numSand++;
+				break;
+			case "G":
+				numGravel++;
+				break;
+			case "N":
+				numSoil++;
+				break;
+			case "X":
+				numVoid++;
+				break;
+		}	
+	}
+
+
 	private String getLetterFromColor(Color color){
 		String returnLetter = "";
 		
 		String colorString = color.toString();
 
 		switch (colorString) {
-		case "java.awt.Color[r=0,g=0,b=0]": returnLetter = "X"; //Black=  Void or None or chasm-abyss-fissure-crevasse
+		case "java.awt.Color[r=0,g=0,b=0]":  //Black=  Void or None or chasm-abyss-fissure-crevasse
+			returnLetter = "X";
 			break;	
 		case "java.awt.Color[r=63,g=72,b=204]": // Blue=  Rock 
 			returnLetter = "R";
@@ -219,6 +340,9 @@ public class PaintMapUtility {
 			break;
 		case "java.awt.Color[r=255,g=242,b=0]":  // Yellow=  Sand 
 			returnLetter = "S";
+			break;
+		case "java.awt.Color[r=195,g=195,b=195]":  // Lt Grey=  Gravel
+			returnLetter = "G";
 			break;
 		case "java.awt.Color[r=237,g=28,b=36]": // Red=  Radioactive
 			returnLetter = "Y";
@@ -358,7 +482,7 @@ public class PaintMapUtility {
 	
 	public static void main(String[] args) throws IOException {
 		PaintMapUtility cptm = new PaintMapUtility();
-		cptm.parseInputFromMaintMapFiles("PalletMap.txt");
+		cptm.parseInputFromMaintMapFiles("PaintMap.txt");
 		
 		cptm.saveToDisplayTextFile("convertedPaintMapToTextMap.txt");		
 		
