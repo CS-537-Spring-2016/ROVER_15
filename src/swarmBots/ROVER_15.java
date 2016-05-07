@@ -148,35 +148,29 @@ public class ROVER_15 {
 			// tile S = y + 1; N = y - 1; E = x + 1; W = x - 1
 			
 			if(blocked){
+				if(roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
 				currentDir = getRandomDirection(currentDir);
-				blocked = false;
-				counter = 0;
+				}
+			
 			}
-			else if(blocked_byNothing){
+			if(blocked_byNothing){
 				List<Integer> allowedDirections = getDirectionsToTargetLocation();
 				currentDir = getRandomDirection(currentDir,allowedDirections);
-				counter = 0;
-				blocked_byNothing = false;
-			}
-			
-			if(goingNESW[currentDir]){
-				if(roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
-					blocked = true;
-					counter = 0;
-				}		
-				else if(counter > 10){
-					blocked_byNothing = true;
-					counter = 0;
-				}
-				else{
-					counter += 1;
-					out.println("MOVE "+cardinals[currentDir]);
-					blocked = false;
-				}
 				
 			}
+			counter -= 1;
+			if(counter < 5){
+			blocked_byNothing = true;
+			blocked = false;
+			}
+			if(roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
+				blocked = true;
+				blocked_byNothing = false;
+				counter = 50;
+			}
+			out.println("MOVE "+cardinals[currentDir]);
 			
-
+			
 			// another call for current location
 			out.println("LOC");
 			line = in.readLine();
@@ -223,6 +217,15 @@ public class ROVER_15 {
 		}
 		else if(currentLocation.xpos > targetLocation.ypos){
 			possibleDirections.add(0);
+		}
+		if((currentLocation.ypos == targetLocation.ypos) && (currentLocation.xpos == targetLocation.xpos)){
+			// TODO for Layala and Krish
+			
+			// now our Rover Would have reached the target location by this line.
+			
+			// here Krish will write the code for collecting data science
+			// here Layala we need to write the code to set next target location
+			
 		}
 		
 		return possibleDirections;
@@ -289,7 +292,7 @@ public class ROVER_15 {
 		int Result = current;
 		goingNESW[current] = false;
 		
-		while ((! allowedDirections.contains(Result)) || Result == current){
+		while ((! allowedDirections.contains(Result))){// || Result == current){
 			Result = r.nextInt(High-Low) + Low;
 		}
 		goingNESW[Result] = true;
