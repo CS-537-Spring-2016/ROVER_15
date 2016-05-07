@@ -1,0 +1,100 @@
+MapInit: PalletMap.txt
+location 0 0  _R_63_G_72_B_204
+Blue=   java.awt.Color[r=63,g=72,b=204]
+---------------------------
+location 0 1  _R_237_G_28_B_36
+Red=   java.awt.Color[r=237,g=28,b=36]
+---------------------------
+location 0 2  _R_34_G_177_B_76
+Green=   java.awt.Color[r=34,g=177,b=76]
+---------------------------
+location 0 3  _R_255_G_127_B_39
+Orange=   java.awt.Color[r=255,g=127,b=39]
+---------------------------
+location 0 4  _R_255_G_242_B_0
+Yellow=   java.awt.Color[r=255,g=242,b=0]
+---------------------------
+location 0 5  _R_163_G_73_B_164
+Purple=   java.awt.Color[r=163,g=73,b=164]
+---------------------------
+location 0 6  _R_136_G_0_B_21
+Dark Red=   java.awt.Color[r=136,g=0,b=21]
+---------------------------
+location 0 7  _R_0_G_162_B_232
+Turquoise=   java.awt.Color[r=0,g=162,b=232]
+---------------------------
+location 0 8  _R_255_G_255_B_255
+White=   java.awt.Color[r=255,g=255,b=255]
+---------------------------
+location 0 9  _R_127_G_127_B_127
+Dark Grey=   java.awt.Color[r=127,g=127,b=127]
+---------------------------
+location 0 10  _R_195_G_195_B_195
+Lt Grey=   java.awt.Color[r=195,g=195,b=195]
+---------------------------
+location 0 11  _R_255_G_174_B_201
+Pink=   java.awt.Color[r=255,g=174,b=201]
+---------------------------
+location 0 12  _R_255_G_201_B_14
+Gold=   java.awt.Color[r=255,g=201,b=14]
+---------------------------
+location 0 13  _R_181_G_230_B_29
+Lime=   java.awt.Color[r=181,g=230,b=29]
+---------------------------
+location 0 14  _R_153_G_217_B_234
+Lt Turquoise=   java.awt.Color[r=153,g=217,b=234]
+---------------------------
+location 0 15  _R_112_G_146_B_190
+Blue-Grey=   java.awt.Color[r=112,g=146,b=190]
+---------------------------
+location 0 16  _R_255_G_255_B_255
+White=   java.awt.Color[r=255,g=255,b=255]
+---------------------------
+location 0 17  _R_0_G_0_B_0
+Black=   java.awt.Color[r=0,g=0,b=0]
+---------------------------
+location 0 18  _R_255_G_255_B_255
+java.awt.Color[r=255,g=255,b=255]
+---------------------------
+location 0 19  _R_255_G_255_B_255
+java.awt.Color[r=255,g=255,b=255]
+---------------------------
+
+
+
+
+Blue=   java.awt.Color[r=63,g=72,b=204]
+
+Red=   java.awt.Color[r=237,g=28,b=36]
+
+Green=   java.awt.Color[r=34,g=177,b=76]
+
+Orange=   java.awt.Color[r=255,g=127,b=39]
+
+
+Yellow=   java.awt.Color[r=255,g=242,b=0]
+
+Purple=   java.awt.Color[r=163,g=73,b=164]
+
+Dark Red=   java.awt.Color[r=136,g=0,b=21]
+
+Turquoise=   java.awt.Color[r=0,g=162,b=232]
+
+Dark Grey=   java.awt.Color[r=127,g=127,b=127]
+
+Lt Grey=   java.awt.Color[r=195,g=195,b=195]
+
+Pink=   java.awt.Color[r=255,g=174,b=201]
+
+Gold=   java.awt.Color[r=255,g=201,b=14]
+
+Lime=   java.awt.Color[r=181,g=230,b=29]
+
+Lt Turquoise=   java.awt.Color[r=153,g=217,b=234]
+
+Blue-Grey=   java.awt.Color[r=112,g=146,b=190]
+
+White=   java.awt.Color[r=255,g=255,b=255]
+
+Black=   java.awt.Color[r=0,g=0,b=0]
+

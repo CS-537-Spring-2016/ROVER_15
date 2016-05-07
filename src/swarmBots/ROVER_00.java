@@ -399,7 +399,16 @@ public class ROVER_00 {
 	 * Runs the client
 	 */
 	public static void main(String[] args) throws Exception {
-		ROVER_00 client = new ROVER_00();
+		ROVER_00 client;
+    	// if a command line argument is included it is used as the map filename
+		// if present uses an IP address instead of localhost 
+		
+		if(!(args.length == 0)){
+			client = new ROVER_00(args[0]);
+		} else {
+			client = new ROVER_00();
+		}
+		
 		client.run();
 	}
 }
