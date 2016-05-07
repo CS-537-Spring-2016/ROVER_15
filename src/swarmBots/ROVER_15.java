@@ -32,7 +32,6 @@ import enums.Terrain;
 
 public class ROVER_15 {
 
-	PriorityQueue<Coord> pqTargets = new PriorityQueue<Coord>();
 	BufferedReader in;
 	PrintWriter out;
 	String rovername;
@@ -198,6 +197,7 @@ public class ROVER_15 {
 	}
 
 	private List<Integer> getDirectionsToTargetLocation() throws IOException {
+		PriorityQueue<Coord> pqTargets = new PriorityQueue<Coord>();
 		String line = "";
 		List<Integer> possibleDirections = new ArrayList<Integer>();
 		out.println("LOC");
@@ -206,7 +206,7 @@ public class ROVER_15 {
 		out.println("TARGET_LOC");
 		line = in.readLine();
 		Coord targetLocation = extractTargetLOC(line);
-		pqTargets.offer(targetLocation);
+		pqTargets.add(targetLocation);
 		
 		if(currentLocation.xpos < targetLocation.xpos){
 			possibleDirections.add(1);
@@ -226,8 +226,11 @@ public class ROVER_15 {
 			// TODO: Krish, will write the code for collecting data science
 			
 			// remove target we arrived at from target queue
-			pqTargets.poll();
 			// TODO: remove target from global map so other rovers don't come to it
+			pqTargets.poll();
+//			for (Coord x : pqTargets){
+//				System.err.println(x);
+//			}
 			
 			// if target queue is empty, go to a random coordinate within map. else set new target location from queue
 			if (pqTargets == null){
