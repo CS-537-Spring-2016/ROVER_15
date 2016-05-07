@@ -223,13 +223,18 @@ public class ROVER_15 {
 		
 		// now our Rover Would have reached the target location by this line.
 		if((currentLocation.ypos == targetLocation.ypos) && (currentLocation.xpos == targetLocation.xpos)){
-			// TODO Layla, write the code to set next target location
 			// TODO: Krish, will write the code for collecting data science
 			
+			// remove target we arrived at from target queue
 			pqTargets.poll();
+			// TODO: remove target from global map so other rovers don't come to it
 			
+			// if target queue is empty, go to a random coordinate within map. else set new target location from queue
 			if (pqTargets == null){
-				System.err.println("There are no targets currently in the priority queue");
+				int maxMapLength = scanMap.getEdgeSize();  // is the map always going to be square?
+				int randomNuminRange = getRandom(maxMapLength);
+				Coord randomCoord = new Coord(randomNuminRange, randomNuminRange);
+				targetLocation = randomCoord;
 			} else {
 				targetLocation = pqTargets.peek();
 			}
@@ -238,6 +243,11 @@ public class ROVER_15 {
 		
 		return possibleDirections;
 	}
+	
+	public static int getRandom(int max){ 
+		return (int) (Math.random()*max);
+	}
+
 
 	private boolean roverStuckIncurrentDir(int currentDir, MapTile[][] scanMapTiles, int centerIndex) {
 		boolean returnValue = false;
