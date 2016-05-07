@@ -1,0 +1,6 @@
+PalletMap.txt
+1 20 Map_Width_Height
+0 0 StartPosition(x,y)
+0 0 TargetPosition(x,y)
+PalletTerrain.ppm
+PalletScience.ppm

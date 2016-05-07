@@ -1,0 +1,47 @@
+PalletMap.txt
+1 20 Map_Width_Height
+0 0 StartPosition(x,y)
+0 0 TargetPosition(x,y)
+KEY:<Terrain> R = Rock; G = Gravel; S = Sand; X = abyss;  <Science> Y = Radioactive; C = Crystal; M = Mineral; O = Organic; <Rover> ##
+ 0  
+ __
+|  | 0
+|R_|
+|  | 1
+|_Y|
+|00| 2
+|__|
+|  | 3
+|__|
+|  | 4
+|SY|
+|  | 5
+|__|
+|  | 6
+|SY|
+|  | 7
+|SY|
+|  | 8
+|SY|
+|  | 9
+|SY|
+|  | 10
+|SY|
+|  | 11
+|SY|
+|  | 12
+|_Y|
+|  | 13
+|_Y|
+|  | 14
+|_C|
+|  | 15
+|__|
+|  | 16
+|__|
+|  | 17
+|__|
+|  | 18
+|__|
+|  | 19
+|__|

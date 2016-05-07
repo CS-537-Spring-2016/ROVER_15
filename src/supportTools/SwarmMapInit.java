@@ -161,6 +161,7 @@ public class SwarmMapInit {
 			int yPos = (int) yCount;
 
 			for (int i = 0; i < mapWidth; i++) {
+				// grab the 2nd and 3rd character in a 3 character block based on i
 				String tstr = myLine.substring(i * 3 + 1, i * 3 + 3);
 				if (isInteger(tstr)) {
 					String rName = "ROVER_" + tstr;
