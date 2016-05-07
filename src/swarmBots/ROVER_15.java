@@ -218,6 +218,15 @@ public class ROVER_15 {
 		else if(currentLocation.xpos > targetLocation.ypos){
 			possibleDirections.add(0);
 		}
+		if((currentLocation.ypos == targetLocation.ypos) && (currentLocation.xpos == targetLocation.xpos)){
+			// TODO for Layala and Krish
+			
+			// now our Rover Would have reached the target location by this line.
+			
+			// here Krish will write the code for collecting data science
+			// here Layala we need to write the code to set next target location
+			
+		}
 		
 		return possibleDirections;
 	}
