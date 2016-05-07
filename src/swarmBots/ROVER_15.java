@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Random;
 
 import com.google.gson.Gson;
@@ -31,6 +32,7 @@ import enums.Terrain;
 
 public class ROVER_15 {
 
+	PriorityQueue<Coord> pqTargets = new PriorityQueue<Coord>();
 	BufferedReader in;
 	PrintWriter out;
 	String rovername;
@@ -87,7 +89,6 @@ public class ROVER_15 {
 		// int cnt=0;
 		String line = "";
 
-		
 		
 		boolean stuck = false; // just means it did not change locations between requests,
 								// could be velocity limit or obstruction etc.
@@ -148,35 +149,29 @@ public class ROVER_15 {
 			// tile S = y + 1; N = y - 1; E = x + 1; W = x - 1
 			
 			if(blocked){
+				if(roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
 				currentDir = getRandomDirection(currentDir);
-				blocked = false;
-				counter = 0;
+				}
+			
 			}
-			else if(blocked_byNothing){
+			if(blocked_byNothing){
 				List<Integer> allowedDirections = getDirectionsToTargetLocation();
 				currentDir = getRandomDirection(currentDir,allowedDirections);
-				counter = 0;
-				blocked_byNothing = false;
-			}
-			
-			if(goingNESW[currentDir]){
-				if(roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
-					blocked = true;
-					counter = 0;
-				}		
-				else if(counter > 10){
-					blocked_byNothing = true;
-					counter = 0;
-				}
-				else{
-					counter += 1;
-					out.println("MOVE "+cardinals[currentDir]);
-					blocked = false;
-				}
 				
 			}
+			counter -= 1;
+			if(counter < 5){
+			blocked_byNothing = true;
+			blocked = false;
+			}
+			if(roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
+				blocked = true;
+				blocked_byNothing = false;
+				counter = 50;
+			}
+			out.println("MOVE "+cardinals[currentDir]);
 			
-
+			
 			// another call for current location
 			out.println("LOC");
 			line = in.readLine();
@@ -211,6 +206,7 @@ public class ROVER_15 {
 		out.println("TARGET_LOC");
 		line = in.readLine();
 		Coord targetLocation = extractTargetLOC(line);
+		pqTargets.offer(targetLocation);
 		
 		if(currentLocation.xpos < targetLocation.xpos){
 			possibleDirections.add(1);
@@ -223,6 +219,21 @@ public class ROVER_15 {
 		}
 		else if(currentLocation.xpos > targetLocation.ypos){
 			possibleDirections.add(0);
+		}
+		
+		// now our Rover Would have reached the target location by this line.
+		if((currentLocation.ypos == targetLocation.ypos) && (currentLocation.xpos == targetLocation.xpos)){
+			// TODO Layla, write the code to set next target location
+			// TODO: Krish, will write the code for collecting data science
+			
+			pqTargets.poll();
+			
+			if (pqTargets == null){
+				System.err.println("There are no targets currently in the priority queue");
+			} else {
+				targetLocation = pqTargets.peek();
+			}
+			
 		}
 		
 		return possibleDirections;
@@ -289,7 +300,7 @@ public class ROVER_15 {
 		int Result = current;
 		goingNESW[current] = false;
 		
-		while ((! allowedDirections.contains(Result)) || Result == current){
+		while ((! allowedDirections.contains(Result))){// || Result == current){
 			Result = r.nextInt(High-Low) + Low;
 		}
 		goingNESW[Result] = true;
