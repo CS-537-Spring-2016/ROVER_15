@@ -6,6 +6,9 @@ import java.util.List;
 
 // thank you to this post: http://stackoverflow.com/questions/3054247/how-to-define-properties-for-enum-items
 
+// Sensors: RADIATION_SENSOR->Radioactivescience; CHEMICAL_SENSOR->Organic Science;
+//	SPECTRAL_SENSOR->Crystal Science; RADAR_SENSOR  ->mineral Science
+
 public enum RoverName {
 	// (Drive type, accessory slot 1, accessory slot 2)
 	NONE,
@@ -35,6 +38,7 @@ public enum RoverName {
 	
 	// sample test rovers
 	ROVER_00 ("WHEELS", "RADIATION_SENSOR", "RADAR_SENSOR"),
+	ROVER_98 ("WALKER", "DRILL", "SPECTRAL_SENSOR"),
 	ROVER_99 ("TREADS", "SPECTRAL_SENSOR", "CHEMICAL_SENSOR");
 	
     private final List<String> members;
@@ -112,6 +116,10 @@ public enum RoverName {
     		break;
     	case "ROVER_20":
     		output = RoverName.ROVER_20;
+    		break;
+    	
+    	case "ROVER_98":
+    		output = RoverName.ROVER_98;
     		break;
     	case "ROVER_99":
     		output = RoverName.ROVER_99;
