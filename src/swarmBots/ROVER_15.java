@@ -1,3 +1,9 @@
+
+
+
+
+
+
 package swarmBots;
 
 import java.io.BufferedReader;
@@ -205,7 +211,8 @@ public class ROVER_15 {
 		Coord currentLocation = extractLOC(line);
 		out.println("TARGET_LOC");
 		line = in.readLine();
-		Coord targetLocation = extractTargetLOC(line);
+//		Coord targetLocation = extractTargetLOC(line);
+		Coord targetLocation = new Coord (8, 18);
 		pqTargets.add(targetLocation);
 		
 		
