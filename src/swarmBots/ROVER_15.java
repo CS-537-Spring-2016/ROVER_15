@@ -150,12 +150,10 @@ public class ROVER_15 {
 			if(blocked){
 				if(roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
 				currentDir = getRandomDirection(currentDir);
-<<<<<<< HEAD
-=======
+
 				}
 				else if(counter % 25 == 0){
 					currentDir = getRandomDirection(currentDir);
->>>>>>> b6548d1c212ef26fbd8cc5001a8e5002a29b1c34
 				}
 			
 			}
@@ -174,16 +172,13 @@ public class ROVER_15 {
 				blocked_byNothing = false;
 				counter = 50;
 			}
-<<<<<<< HEAD
+
 			out.println("MOVE "+cardinals[currentDir]);
-=======
+
 			if( ! roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
 				out.println("MOVE "+cardinals[currentDir]);
 				}
-			
->>>>>>> b6548d1c212ef26fbd8cc5001a8e5002a29b1c34
-			
-			
+		
 			// another call for current location
 			out.println("LOC");
 			line = in.readLine();
