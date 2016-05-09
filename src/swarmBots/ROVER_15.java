@@ -15,10 +15,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
-<<<<<<< HEAD
+
 import java.util.Queue;
-=======
->>>>>>> b52f8aa66fe557ea159cf483578beb9cf00622db
 import java.util.Random;
 
 import com.google.gson.Gson;
@@ -109,10 +107,11 @@ public class ROVER_15 {
 		int currentDir = 3;
 		Coord currentLoc = null;
 		Coord previousLoc = null;
-
+		
 		Queue<Coord> targets = new LinkedList<>();
+		
 		Coord firstTL = new Coord(20,4);
-		Coord secondTL = new Coord(31,11);
+		Coord secondTL = new Coord(20,10);
 		Coord thirdTL = new Coord(17,15);
 		
 		
@@ -121,11 +120,10 @@ public class ROVER_15 {
 		targets.add(secondTL);
 		targets.add(thirdTL);
 		
-		Coord targetLocation = targets.poll(); 
-
+		
 		// start Rover controller process
 		while (true) {
-
+			
 			// currently the requirements allow sensor calls to be made with no
 			// simulated resource cost
 			
@@ -174,22 +172,23 @@ public class ROVER_15 {
 				if(roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
 				currentDir = getRandomDirection(currentDir);
 				}
-<<<<<<< HEAD
+
 				else if(counter % 25 == 0){
 					currentDir = getRandomDirection(currentDir);
 				}
 			
 			}
+		
 			if(blocked_byNothing){
-				List<Integer> allowedDirections = getDirectionsToTargetLocation(targetLocation);
 				
-				
-=======
-			
-			}
-			if(blocked_byNothing){
-				List<Integer> allowedDirections = getDirectionsToTargetLocation();
->>>>>>> b52f8aa66fe557ea159cf483578beb9cf00622db
+				List<String> allowedDirections = getDirectionsToTargetLocation(targets);
+				for(String s : allowedDirections)
+				{
+					if(s.contains("gathered"))
+					{
+						allowedDirections.remove(s);
+					}
+				}
 				currentDir = getRandomDirection(currentDir,allowedDirections);
 				
 			}
@@ -203,18 +202,18 @@ public class ROVER_15 {
 				blocked_byNothing = false;
 				counter = 50;
 			}
-<<<<<<< HEAD
+
 			if( ! roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
 				out.println("MOVE "+cardinals[currentDir]);
 				}
 			
 			
 			
-=======
+
 			out.println("MOVE "+cardinals[currentDir]);
 			
 			
->>>>>>> b52f8aa66fe557ea159cf483578beb9cf00622db
+
 			// another call for current location
 			out.println("LOC");
 			line = in.readLine();
@@ -240,41 +239,26 @@ public class ROVER_15 {
 
 	}
 
-<<<<<<< HEAD
-	private List<Integer> getDirectionsToTargetLocation(Coord targetLocation) throws IOException {
-		Queue<Coord> targets = new LinkedList<>();
-=======
-	private List<Integer> getDirectionsToTargetLocation() throws IOException {
-		PriorityQueue<Coord> pqTargets = new PriorityQueue<Coord>();
->>>>>>> b52f8aa66fe557ea159cf483578beb9cf00622db
+
+
+	private List<String> getDirectionsToTargetLocation(Queue<Coord> targets) throws IOException {
+		Queue<Coord> pqTargets = new LinkedList<>();
+		
 		String line = "";
-		List<Integer> possibleDirections = new ArrayList<Integer>();
+		List<String> possibleDirections = new ArrayList<String>();
 		out.println("LOC");
 		line = in.readLine();
 		Coord currentLocation = extractLOC(line);
 		out.println("TARGET_LOC");
 		line = in.readLine();
-<<<<<<< HEAD
+
 		//Coord targetLocation = extractTargetLOC(line);
 		
 		
 		
-		//Coord targetLocation = targets.poll();
-		System.out.println	("Current target = ("+targetLocation.xpos+","+targetLocation.ypos+")");
-		if((currentLocation.ypos == targetLocation.ypos) && (currentLocation.xpos == targetLocation.xpos)){
-			// TODO for Layala and Krish
-			
-			// now our Rover Would have reached the target location by this line.
-			
-			// here Krish will write the code for collecting data science
-			// here Layala we need to write the code to set next target location
-			out.println("GATHER");
-			//targets.add(secondTL);
-			//targetLocation = targets.poll();
-			System.out.println("After getting science : - "+targetLocation.xpos);
-=======
-//		Coord targetLocation = extractTargetLOC(line);
-		Coord targetLocation = new Coord (8, 18);
+		 
+		Coord targetLocation = targets.element();
+		//Coord targetLocation = new Coord (8, 18);
 		pqTargets.add(targetLocation);
 		
 		
@@ -285,7 +269,7 @@ public class ROVER_15 {
 			
 			// remove target we arrived at from target queue
 			// TODO: remove target from global map so other rovers don't come to it
-			pqTargets.poll();
+			possibleDirections.add("gathered "+targets.peek());
 			
 			// if target queue is empty, go to a random coordinate within map. else set new target location from queue
 			// TODO: Fix randomCoord. Not working.
@@ -296,29 +280,23 @@ public class ROVER_15 {
 				Coord randomCoord = new Coord(30, 30);
 				targetLocation = randomCoord;
 			} else {
-				targetLocation = pqTargets.peek();
+				targetLocation = targets.poll();
 			}
->>>>>>> b52f8aa66fe557ea159cf483578beb9cf00622db
+
 			
 		}
 		if(currentLocation.xpos < targetLocation.xpos){
-			possibleDirections.add(1);
+			possibleDirections.add("1");
 		}
 		else if(currentLocation.xpos > targetLocation.xpos){
-			possibleDirections.add(3);
+			possibleDirections.add("3");
 		}
 		if(currentLocation.ypos < targetLocation.ypos){
-			possibleDirections.add(2);
+			possibleDirections.add("2");
 		}
 		else if(currentLocation.xpos > targetLocation.ypos){
-			possibleDirections.add(0);
+			possibleDirections.add("0");
 		}
-		
-	
-<<<<<<< HEAD
-=======
-		
->>>>>>> b52f8aa66fe557ea159cf483578beb9cf00622db
 		return possibleDirections;
 	}
 	
@@ -381,14 +359,18 @@ public class ROVER_15 {
 		return Result;
 	}
 	
-	public int getRandomDirection(int current, List<Integer> allowedDirections  ) {
+	public int getRandomDirection(int current, List<String> allowedDirections  ) {
 		Random r = new Random();
 		int Low = 0;
 		int High = 4;
 		int Result = current;
 		goingNESW[current] = false;
-		
-		while ((! allowedDirections.contains(Result))){// || Result == current){
+		List<Integer> allowedDirectionsIntegerArray = new ArrayList<>();
+		for(String s:allowedDirections)
+		{
+			allowedDirectionsIntegerArray.add(Integer.parseInt(s));
+		}
+		while ((! allowedDirectionsIntegerArray.contains(Result))){// || Result == current){
 			Result = r.nextInt(High-Low) + Low;
 		}
 		goingNESW[Result] = true;
