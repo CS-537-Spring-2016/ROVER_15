@@ -1,3 +1,9 @@
+
+
+
+
+
+
 package swarmBots;
 
 import java.io.BufferedReader;
@@ -9,7 +15,10 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
+<<<<<<< HEAD
 import java.util.Queue;
+=======
+>>>>>>> b52f8aa66fe557ea159cf483578beb9cf00622db
 import java.util.Random;
 
 import com.google.gson.Gson;
@@ -91,7 +100,6 @@ public class ROVER_15 {
 		String line = "";
 
 		
-		
 		boolean stuck = false; // just means it did not change locations between requests,
 								// could be velocity limit or obstruction etc.
 		boolean blocked = false;
@@ -166,6 +174,7 @@ public class ROVER_15 {
 				if(roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
 				currentDir = getRandomDirection(currentDir);
 				}
+<<<<<<< HEAD
 				else if(counter % 25 == 0){
 					currentDir = getRandomDirection(currentDir);
 				}
@@ -175,6 +184,12 @@ public class ROVER_15 {
 				List<Integer> allowedDirections = getDirectionsToTargetLocation(targetLocation);
 				
 				
+=======
+			
+			}
+			if(blocked_byNothing){
+				List<Integer> allowedDirections = getDirectionsToTargetLocation();
+>>>>>>> b52f8aa66fe557ea159cf483578beb9cf00622db
 				currentDir = getRandomDirection(currentDir,allowedDirections);
 				
 			}
@@ -188,12 +203,18 @@ public class ROVER_15 {
 				blocked_byNothing = false;
 				counter = 50;
 			}
+<<<<<<< HEAD
 			if( ! roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
 				out.println("MOVE "+cardinals[currentDir]);
 				}
 			
 			
 			
+=======
+			out.println("MOVE "+cardinals[currentDir]);
+			
+			
+>>>>>>> b52f8aa66fe557ea159cf483578beb9cf00622db
 			// another call for current location
 			out.println("LOC");
 			line = in.readLine();
@@ -219,8 +240,13 @@ public class ROVER_15 {
 
 	}
 
+<<<<<<< HEAD
 	private List<Integer> getDirectionsToTargetLocation(Coord targetLocation) throws IOException {
 		Queue<Coord> targets = new LinkedList<>();
+=======
+	private List<Integer> getDirectionsToTargetLocation() throws IOException {
+		PriorityQueue<Coord> pqTargets = new PriorityQueue<Coord>();
+>>>>>>> b52f8aa66fe557ea159cf483578beb9cf00622db
 		String line = "";
 		List<Integer> possibleDirections = new ArrayList<Integer>();
 		out.println("LOC");
@@ -228,6 +254,7 @@ public class ROVER_15 {
 		Coord currentLocation = extractLOC(line);
 		out.println("TARGET_LOC");
 		line = in.readLine();
+<<<<<<< HEAD
 		//Coord targetLocation = extractTargetLOC(line);
 		
 		
@@ -245,6 +272,33 @@ public class ROVER_15 {
 			//targets.add(secondTL);
 			//targetLocation = targets.poll();
 			System.out.println("After getting science : - "+targetLocation.xpos);
+=======
+//		Coord targetLocation = extractTargetLOC(line);
+		Coord targetLocation = new Coord (8, 18);
+		pqTargets.add(targetLocation);
+		
+		
+		// now our Rover Would have reached the target location by this line.
+		if((currentLocation.ypos == targetLocation.ypos) && (currentLocation.xpos == targetLocation.xpos)){
+			// collect science. Ran out of time in class. TODO: Finish
+			out.println("GATHER");			
+			
+			// remove target we arrived at from target queue
+			// TODO: remove target from global map so other rovers don't come to it
+			pqTargets.poll();
+			
+			// if target queue is empty, go to a random coordinate within map. else set new target location from queue
+			// TODO: Fix randomCoord. Not working.
+			if (pqTargets.size() == 0){
+//				int maxMapLength = scanMap.getEdgeSize();  // is the map always going to be square?
+//				int randomNuminRange = getRandom(maxMapLength);
+//				Coord randomCoord = new Coord(randomNuminRange, randomNuminRange);
+				Coord randomCoord = new Coord(30, 30);
+				targetLocation = randomCoord;
+			} else {
+				targetLocation = pqTargets.peek();
+			}
+>>>>>>> b52f8aa66fe557ea159cf483578beb9cf00622db
 			
 		}
 		if(currentLocation.xpos < targetLocation.xpos){
@@ -261,8 +315,17 @@ public class ROVER_15 {
 		}
 		
 	
+<<<<<<< HEAD
+=======
+		
+>>>>>>> b52f8aa66fe557ea159cf483578beb9cf00622db
 		return possibleDirections;
 	}
+	
+	public static int getRandom(int max){ 
+		return (int) (Math.random()*max);
+	}
+
 
 	private boolean roverStuckIncurrentDir(int currentDir, MapTile[][] scanMapTiles, int centerIndex) {
 		boolean returnValue = false;
