@@ -130,7 +130,7 @@ public class SwarmMapInit {
 
 		// line 1 - map name
 		this.mapName = bufRead.readLine();
-		System.out.println(this.mapName);
+		System.out.println("MapInit: " + this.mapName);
 
 		// line 2 - map width and height
 		Coord mapSize = extractCoord(bufRead.readLine());
@@ -149,6 +149,9 @@ public class SwarmMapInit {
 		// line 6 - skip past the column number lines
 		bufRead.readLine();
 		
+		// line 7 - skip past the top row of underline characters
+		bufRead.readLine();
+		
 		this.planetMap = new PlanetMap(this.mapWidth, this.mapHeight, startPos, targetPos);
 		
 		double yCount = 0.0;
@@ -158,6 +161,7 @@ public class SwarmMapInit {
 			int yPos = (int) yCount;
 
 			for (int i = 0; i < mapWidth; i++) {
+				// grab the 2nd and 3rd character in a 3 character block based on i
 				String tstr = myLine.substring(i * 3 + 1, i * 3 + 3);
 				if (isInteger(tstr)) {
 					String rName = "ROVER_" + tstr;
@@ -193,7 +197,7 @@ public class SwarmMapInit {
 	
 	public void printToDisplayTextFile() {	
 		String printMapString = makeInitString();		
-		System.out.println(printMapString);
+		System.out.println("MapInit: " + printMapString);
 	}
 
 	
@@ -216,9 +220,12 @@ public class SwarmMapInit {
 	public String makeInitString(){
 		StringBuilder printMap = new StringBuilder();
 		printMap.append(this.mapName + "\n");
-		printMap.append(this.planetMap.getWidth() + " " + this.planetMap.getHeight() + " Map_Width_Height\n");
-		printMap.append(planetMap.getStartPosition().xpos + " " + planetMap.getStartPosition().ypos + " StartPosition(x,y)\n");
-		printMap.append(planetMap.getTargetPosition().xpos + " " + planetMap.getTargetPosition().ypos + " TargetPosition(x,y)\n");
+		printMap.append(this.planetMap.getWidth() + " " 
+							+ this.planetMap.getHeight() + " Map_Width_Height\n");
+		printMap.append(planetMap.getStartPosition().xpos + " " 
+							+ planetMap.getStartPosition().ypos + " StartPosition(x,y)\n");
+		printMap.append(planetMap.getTargetPosition().xpos + " " 
+							+ planetMap.getTargetPosition().ypos + " TargetPosition(x,y)\n");
 		
 		printMap.append("KEY:<Terrain> R = Rock; G = Gravel; S = Sand; X = abyss;  <Science> Y = Radioactive; C = Crystal; M = Mineral; O = Organic; <Rover> ##\n");
 		
@@ -285,10 +292,7 @@ public class SwarmMapInit {
 	public static Coord extractCoord(String inputString) {
 		if (inputString.lastIndexOf(" ") != -1) {
 			String xPosStr = inputString.substring(0, inputString.indexOf(" "));
-			System.out.println("extracted xPosStr " + xPosStr);
-
 			String yPosStr = inputString.substring(inputString.indexOf(" ") +1, inputString.lastIndexOf(" "));
-			System.out.println("extracted yPosStr " + yPosStr);
 			return new Coord(Integer.parseInt(xPosStr), Integer.parseInt(yPosStr));
 		}
 		return null;
