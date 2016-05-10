@@ -257,7 +257,6 @@ public class ROVER_15 {
 		if((currentLocation.ypos == targetLocation.ypos) && (currentLocation.xpos == targetLocation.xpos)){
 			// collect science. Ran out of time in class. TODO: Finish
 			out.println("GATHER");			
-			
 			// remove target we arrived at from target queue
 			// TODO: remove target from global map so other rovers don't come to it
 			
