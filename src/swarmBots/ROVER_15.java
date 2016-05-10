@@ -256,16 +256,8 @@ public class ROVER_15 {
 		// now our Rover Would have reached the target location by this line.
 		if((currentLocation.ypos == targetLocation.ypos) && (currentLocation.xpos == targetLocation.xpos)){
 			// collect science. Ran out of time in class. TODO: Finish
-			out.println("GATHER");			
-			// remove target we arrived at from target queue
-			// TODO: remove target from global map so other rovers don't come to it
-			
-			
-			// if target queue is empty, go to a random coordinate within map. else set new target location from queue
-						
+			out.println("GATHER");						
 			targetLocation = targets.poll();
-			
-
 		}
 		if(currentLocation.xpos < targetLocation.xpos){
 			possibleDirections.add(1);
