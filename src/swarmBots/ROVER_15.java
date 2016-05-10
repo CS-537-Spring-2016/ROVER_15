@@ -232,9 +232,7 @@ public class ROVER_15 {
 		}
 
 	}
-
-
-
+	
 	private List<Integer> getDirectionsToTargetLocation(Queue<Coord> targets) throws IOException {
 		String line = "";
 		List<Integer> possibleDirections = new ArrayList<Integer>();
