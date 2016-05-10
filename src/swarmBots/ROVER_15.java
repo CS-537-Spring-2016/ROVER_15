@@ -236,21 +236,12 @@ public class ROVER_15 {
 
 
 	private List<Integer> getDirectionsToTargetLocation(Queue<Coord> targets) throws IOException {
-		Queue<Coord> pqTargets = new LinkedList<>();
-		
 		String line = "";
 		List<Integer> possibleDirections = new ArrayList<Integer>();
 		out.println("LOC");
 		line = in.readLine();
 		Coord currentLocation = extractLOC(line);
-
-		
-		
-		
-		 
 		Coord targetLocation = targets.element();
-		pqTargets.add(targetLocation);
-		
 		System.out.println("Current target = "+targetLocation);
 		
 		// now our Rover Would have reached the target location by this line.
