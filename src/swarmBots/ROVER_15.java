@@ -241,9 +241,18 @@ public class ROVER_15 {
 		out.println("LOC");
 		line = in.readLine();
 		Coord currentLocation = extractLOC(line);
-		Coord targetLocation = targets.element();
-		System.out.println("Current target = "+targetLocation);
-		
+		Coord targetLocation = null;
+		if(!targets.isEmpty())
+		{
+		 targetLocation = targets.element();
+		 System.out.println("Current target = "+targetLocation);
+		}
+		else
+		{
+			out.println("TARGET_LOC");
+			line = in.readLine();
+			targetLocation = extractTargetLOC(line);
+		}
 		// now our Rover Would have reached the target location by this line.
 		if((currentLocation.ypos == targetLocation.ypos) && (currentLocation.xpos == targetLocation.xpos)){
 			// collect science. Ran out of time in class. TODO: Finish
@@ -256,12 +265,7 @@ public class ROVER_15 {
 			// if target queue is empty, go to a random coordinate within map. else set new target location from queue
 						
 			targetLocation = targets.poll();
-			if(targets.isEmpty())
-			{
-				out.println("TARGET_LOC");
-				line = in.readLine();
-				targetLocation = extractTargetLOC(line);
-			}
+			
 
 		}
 		if(currentLocation.xpos < targetLocation.xpos){
