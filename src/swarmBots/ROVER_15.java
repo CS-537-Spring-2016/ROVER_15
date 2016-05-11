@@ -1,3 +1,9 @@
+
+
+
+
+
+
 package swarmBots;
 
 import java.io.BufferedReader;
@@ -6,7 +12,11 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.PriorityQueue;
+
+import java.util.Queue;
 import java.util.Random;
 
 import com.google.gson.Gson;
@@ -88,7 +98,6 @@ public class ROVER_15 {
 		String line = "";
 
 		
-		
 		boolean stuck = false; // just means it did not change locations between requests,
 								// could be velocity limit or obstruction etc.
 		boolean blocked = false;
@@ -99,10 +108,22 @@ public class ROVER_15 {
 		Coord currentLoc = null;
 		Coord previousLoc = null;
 		
-
+		Queue<Coord> targets = new LinkedList<>();
+		
+		Coord firstTL = new Coord(20,4);
+		Coord secondTL = new Coord(20,10);
+		Coord thirdTL = new Coord(17,15);
+		
+		
+		
+		targets.add(firstTL);
+		targets.add(secondTL);
+		targets.add(thirdTL);
+		
+		
 		// start Rover controller process
 		while (true) {
-
+			
 			// currently the requirements allow sensor calls to be made with no
 			// simulated resource cost
 			
@@ -148,33 +169,43 @@ public class ROVER_15 {
 			// tile S = y + 1; N = y - 1; E = x + 1; W = x - 1
 			
 			if(blocked){
-				currentDir = getRandomDirection(currentDir);
-				blocked = false;
-				counter = 0;
-			}
-			else if(blocked_byNothing){
-				List<Integer> allowedDirections = getDirectionsToTargetLocation();
-				currentDir = getRandomDirection(currentDir,allowedDirections);
-				counter = 0;
-				blocked_byNothing = false;
-			}
-			
-			if(goingNESW[currentDir]){
 				if(roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
-					blocked = true;
-					counter = 0;
-				}		
-				else if(counter > 10){
-					blocked_byNothing = true;
-					counter = 0;
+				currentDir = getRandomDirection(currentDir);
 				}
-				else{
-					counter += 1;
-					out.println("MOVE "+cardinals[currentDir]);
-					blocked = false;
+
+				else if(counter % 25 == 0){
+					currentDir = getRandomDirection(currentDir);
 				}
+			
+			}
+		
+			if(blocked_byNothing){
+				
+				List<Integer> allowedDirections = getDirectionsToTargetLocation(targets);
+				
+				currentDir = getRandomDirection(currentDir,allowedDirections);
 				
 			}
+			counter -= 1;
+			if(counter < 5){
+			blocked_byNothing = true;
+			blocked = false;
+			}
+			if(roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
+				blocked = true;
+				blocked_byNothing = false;
+				counter = 50;
+			}
+
+			if( ! roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
+				out.println("MOVE "+cardinals[currentDir]);
+				}
+			
+			
+			
+
+			out.println("MOVE "+cardinals[currentDir]);
+			
 			
 
 			// another call for current location
@@ -201,17 +232,31 @@ public class ROVER_15 {
 		}
 
 	}
-
-	private List<Integer> getDirectionsToTargetLocation() throws IOException {
+	
+	private List<Integer> getDirectionsToTargetLocation(Queue<Coord> targets) throws IOException {
 		String line = "";
 		List<Integer> possibleDirections = new ArrayList<Integer>();
 		out.println("LOC");
 		line = in.readLine();
 		Coord currentLocation = extractLOC(line);
-		out.println("TARGET_LOC");
-		line = in.readLine();
-		Coord targetLocation = extractTargetLOC(line);
-		
+		Coord targetLocation = null;
+		if(!targets.isEmpty())
+		{
+		 targetLocation = targets.element();
+		 System.out.println("Current target = "+targetLocation);
+		}
+		else
+		{
+			out.println("TARGET_LOC");
+			line = in.readLine();
+			targetLocation = extractTargetLOC(line);
+		}
+		// now our Rover Would have reached the target location by this line.
+		if((currentLocation.ypos == targetLocation.ypos) && (currentLocation.xpos == targetLocation.xpos)){
+			// collect science. Ran out of time in class. TODO: Finish
+			out.println("GATHER");						
+			targetLocation = targets.poll();
+		}
 		if(currentLocation.xpos < targetLocation.xpos){
 			possibleDirections.add(1);
 		}
@@ -224,9 +269,13 @@ public class ROVER_15 {
 		else if(currentLocation.xpos > targetLocation.ypos){
 			possibleDirections.add(0);
 		}
-		
 		return possibleDirections;
 	}
+	
+	public static int getRandom(int max){ 
+		return (int) (Math.random()*max);
+	}
+
 
 	private boolean roverStuckIncurrentDir(int currentDir, MapTile[][] scanMapTiles, int centerIndex) {
 		boolean returnValue = false;
@@ -289,7 +338,8 @@ public class ROVER_15 {
 		int Result = current;
 		goingNESW[current] = false;
 		
-		while ((! allowedDirections.contains(Result)) || Result == current){
+		
+		while ((! allowedDirections.contains(Result))){// || Result == current){
 			Result = r.nextInt(High-Low) + Low;
 		}
 		goingNESW[Result] = true;
