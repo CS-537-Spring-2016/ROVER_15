@@ -1,8 +1,7 @@
 package common;
 
-import common.Coord;
-import common.MapTile;
 
+import common.Coord;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -30,7 +29,7 @@ public class Communication {
         this.parser = new JSONParser();
     }
 
-    public String postScanMapTiles(Coord currentLoc, MapTile[][] scanMapTiles) {
+    public String postScanMapTiles (Coord currentLoc, MapTile[][] scanMapTiles) {
         JSONArray data = convertScanMapTiles(currentLoc, scanMapTiles);
 
         String charset = "UTF-8";

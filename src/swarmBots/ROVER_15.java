@@ -13,6 +13,8 @@ import java.util.Random;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+
+import common.Communication;
 import common.Coord;
 import common.MapTile;
 import common.ScanMap;
@@ -164,6 +166,10 @@ public class ROVER_15 {
 			scanMap.debugPrintMap();
 
 
+			//***** Communication *****
+			String url = "http://23.251.155.186:3000/api/global";
+			Communication com = new Communication(url);
+
 
 			// ***** Driller Moving Logic *****
 			// pull the MapTile array out of the ScanMap object
@@ -171,6 +177,9 @@ public class ROVER_15 {
 			int centerIndex = (scanMap.getEdgeSize() - 1)/2;
 			// tile S = y + 1; N = y - 1; E = x + 1; W = x - 1
 
+			// posting what we see to the global map for all other rovers to see
+			com.postScanMapTiles(currentLoc, scanMapTiles);
+			
 			if(blocked){
 				// if there is another rover or a rock one away, go in random direction
 				if(roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
