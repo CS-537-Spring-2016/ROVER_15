@@ -1,38 +1,37 @@
-
 package swarmBots;
-
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.lang.reflect.Type;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-
+import java.util.Queue;
+import java.util.Random;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
+import common.Communication;
 import common.Coord;
 import common.MapTile;
 import common.ScanMap;
 import enums.Terrain;
 
+
+//Making an addition to this file to check whether a remote alternat push will change it
+
+// rearanged the 2nd and 3rd line in the following comment
+
 /**
  * The seed that this program is built on is a chat program example found here:
- * http://cs.lmu.edu/~ray/notes/javanetexamples/ Many thanks to the authors for
  * publishing their code examples
- * 
- * ROVER_15  Spec:	Drive = treaders, Tool 1 = Harvester/Excavator, Tool 2 = Driller
- * 
- * 
- * 
+ * * http://cs.lmu.edu/~ray/notes/javanetexamples/ Many thanks to the authors for
  */
 
-public class ROVER_15 
-{
+public class ROVER_15 {
 
 	BufferedReader in;
 	PrintWriter out;
@@ -41,6 +40,10 @@ public class ROVER_15
 	int sleepTime;
 	String SERVER_ADDRESS = "localhost";
 	static final int PORT_ADDRESS = 9537;
+	public static boolean[] goingNESW = {false,false,false,true};
+	public static String[] cardinals = {"N","E","S","W"};
+	public static int counter = 0;
+
 
 	public ROVER_15() {
 		// constructor
@@ -50,7 +53,7 @@ public class ROVER_15
 		// this should be a safe but slow timer value
 		sleepTime = 300; // in milliseconds - smaller is faster, but the server will cut connection if it is too small
 	}
-	
+
 	public ROVER_15(String serverAddress) {
 		// constructor
 		System.out.println("ROVER_15 rover object constructed");
@@ -78,177 +81,329 @@ public class ROVER_15
 			String line = in.readLine();
 			if (line.startsWith("SUBMITNAME")) {
 				out.println(rovername); // This sets the name of this instance
-										// of a swarmBot for identifying the
-										// thread to the server
+				// of a swarmBot for identifying the
+				// thread to the server
 				break;
 			}
 		}
+
 
 		// ******** Rover logic *********
 		// int cnt=0;
 		String line = "";
 
-		boolean goingSouth = false;
+
 		boolean stuck = false; // just means it did not change locations between requests,
-								// could be velocity limit or obstruction etc.
+		// could be velocity limit or obstruction etc.
 		boolean blocked = false;
+		boolean blocked_byNothing = false;
 
-		String[] cardinals = new String[4];
-		cardinals[0] = "N";
-		cardinals[1] = "E";
-		cardinals[2] = "S";
-		cardinals[3] = "W";
 
-		String currentDir = cardinals[0]; // currentDir is current direction
-		Coord currentLoc = null; //initially null
-		Coord previousLoc = null; // initially null
+		int currentDir = 3;
+		Coord currentLoc = null;
+		Coord previousLoc = null;
+
+		Queue<Coord> targets = new LinkedList<>();
+		
+		Coord firstTL = new Coord(20,4);
+		Coord secondTL = new Coord(20,10);
+		Coord thirdTL = new Coord(17,15);
+		//Coord fourthTL = new Coord(2,23);
+		//Coord fifthTL = new Coord(13,23);
+		Coord sixthTL = new Coord(1,37); // stuck at this location 
+		targets.add(firstTL);
+		targets.add(secondTL);
+		targets.add(thirdTL);
+		//targets.add(fourthTL);
+		//targets.add(fifthTL);
+		
+		targets.add(sixthTL);
+
 
 		// start Rover controller process
 		while (true) {
 
 			// currently the requirements allow sensor calls to be made with no
 			// simulated resource cost
-			
-			
+
 			// **** location call ****
 			out.println("LOC");
 			line = in.readLine();
-            if (line == null) {
-            	System.out.println("ROVER_15 check connection to server");
-            	line = "";
-            }
+			if (line == null) {
+				System.out.println("ROVER_15 check connection to server");
+				line = "";
+			}
 			if (line.startsWith("LOC")) {
 				// loc = line.substring(4);
 				currentLoc = extractLOC(line);
 			}
 			System.out.println("ROVER_15 currentLoc at start: " + currentLoc);
-			
+
 			// after getting location set previous equal current to be able to check for stuckness and blocked later
 			previousLoc = currentLoc;
-			
-			
-			
-			// **** get equipment listing ****
-			
+
+//			// get jackpot location
+//			out.println("TARGET_LOC");
+//			line = in.readLine();
+
+
+
+			// **** get equipment listing ****			
 			ArrayList<String> equipment = new ArrayList<String>();
 			equipment = getEquipment();
 			//System.out.println("ROVER_15 equipment list results drive " + equipment.get(0));
 			System.out.println("ROVER_15 equipment list results " + equipment + "\n");
-			
-	
+
+
 
 			// ***** do a SCAN *****
 			//System.out.println("ROVER_15 sending SCAN request");
 			this.doScan();
 			scanMap.debugPrintMap();
+
+
+			//***** Communication *****
+			String url = "http://23.251.155.186:3000/api/global";
+			Communication com = new Communication(url);
+
+
+			// ***** Driller Moving Logic *****
+			out.println("TARGET_LOC");
+			line = in.readLine();
+			// pull the MapTile array out of the ScanMap object
+			MapTile[][] scanMapTiles = scanMap.getScanMap();
+			int centerIndex = (scanMap.getEdgeSize() - 1)/2;
+			// tile S = y + 1; N = y - 1; E = x + 1; W = x - 1
+
+			// posting what we see to the global map for all other rovers to see
+			com.postScanMapTiles(currentLoc, scanMapTiles);
 			
-			
+			/* TODO: Grab science Coord from global map and add to targets queue.
+			 * Make sure to exclude science where TERRAIN = ROCK;
+			 */
 			
 
-			
-			// ***** MOVING *****
-			// try moving east 5 block if blocked
-			if (blocked) {
-				for (int i = 0; i < 5; i++) {
-					out.println("MOVE E");
-					//System.out.println("ROVER_15 request move E");
-					Thread.sleep(300);
+			if(blocked){
+				// if there is another rover or a rock one away, go in random direction
+				if(roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
+					currentDir = getRandomDirection(currentDir);
 				}
+
+				else if(counter % 25 == 0){
+					currentDir = getRandomDirection(currentDir);
+				}
+			}
+
+			if(blocked_byNothing){
+				List<Integer> allowedDirections = getDirectionsToTargetLocation(targets);
+				currentDir = getRandomDirection(currentDir,allowedDirections);
+			}
+			counter -= 1;
+
+			if(counter < 5){
+				blocked_byNothing = true;
 				blocked = false;
-				//reverses direction after being blocked
-				goingSouth = !goingSouth;
-			} else {
+			}
 
-				// pull the MapTile array out of the ScanMap object
-				MapTile[][] scanMapTiles = scanMap.getScanMap();
-				int centerIndex = (scanMap.getEdgeSize() - 1)/2;
-				// tile S = y + 1; N = y - 1; E = x + 1; W = x - 1
+			if(roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
+				blocked = true;
+				blocked_byNothing = false;
+				counter = 50;
+			}
 
-				if (goingSouth) {
-					// check scanMap to see if path is blocked to the south
-					// (scanMap may be old data by now)
-					if (scanMapTiles[centerIndex][centerIndex +1].getHasRover() 
-							|| scanMapTiles[centerIndex][centerIndex +1].getTerrain() == Terrain.ROCK
-							|| scanMapTiles[centerIndex][centerIndex +1].getTerrain() == Terrain.NONE) {
-						blocked = true;
-					} else {
-						// request to server to move
-						out.println("MOVE S");
-						//System.out.println("ROVER_15 request move S");
-					}
-					
-				} else {
-					// check scanMap to see if path is blocked to the north
-					// (scanMap may be old data by now)
-					//System.out.println("ROVER_15 scanMapTiles[2][1].getHasRover() " + scanMapTiles[2][1].getHasRover());
-					//System.out.println("ROVER_15 scanMapTiles[2][1].getTerrain() " + scanMapTiles[2][1].getTerrain().toString());
-					
-					if (scanMapTiles[centerIndex][centerIndex -1].getHasRover() 
-							|| scanMapTiles[centerIndex][centerIndex -1].getTerrain() == Terrain.ROCK
-							|| scanMapTiles[centerIndex][centerIndex -1].getTerrain() == Terrain.NONE) {
-						blocked = true;
-					} else {
-						// request to server to move
-						out.println("MOVE N");
-						//System.out.println("ROVER_15 request move N");
-					}					
-				}
+			if( ! roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
+				out.println("MOVE "+cardinals[currentDir]);
 			}
 
 			// another call for current location
 			out.println("LOC");
 			line = in.readLine();
-			if(line == null){
-				System.out.println("ROVER_15 check connection to server");
-				line = "";
-			}
 			if (line.startsWith("LOC")) {
 				currentLoc = extractLOC(line);
 			}
 
-			//System.out.println("ROVER_15 currentLoc after recheck: " + currentLoc);
-			//System.out.println("ROVER_15 previousLoc: " + previousLoc);
+			System.out.println("ROVER_15 currentLoc after recheck: " + currentLoc);
+			System.out.println("ROVER_15 previousLoc: " + previousLoc);
 
 			// test for stuckness
 			stuck = currentLoc.equals(previousLoc);
 
-			//System.out.println("ROVER_15 stuck test " + stuck);
+			System.out.println("ROVER_15 stuck test " + stuck);
 			System.out.println("ROVER_15 blocked test " + blocked);
 
-			// TODO - logic to calculate where to move next
 
-			
-			
 			Thread.sleep(sleepTime);
-			
+
 			System.out.println("ROVER_15 ------------ bottom process control --------------"); 
 		}
-
 	}
 	
-	// ################ Support Methods ###########################
+	private List<Integer> getDirectionsToTargetLocation(Queue<Coord> targets) throws IOException {
+		String line = "";
+		List<Integer> possibleDirections = new ArrayList<Integer>();
+		out.println("LOC");
+		line = in.readLine();
+		Coord currentLocation = extractLOC(line);
+		Coord targetLocation = null;
+
 	
+		//TODO: If a rover spends more than 2 minutes trying to retrieve a target, move to next target
+
+		// if there are science locations in target queue, get closest one
+		if(!targets.isEmpty()){
+//			targetLocation = targets.element();
+			targetLocation = getClosestTarget(currentLocation, targets);
+			System.out.println("Current target = " + targetLocation);
+		}
+		// else go to the jackpot location 
+		else{
+			out.println("TARGET_LOC");
+			line = in.readLine();
+			targetLocation = extractTargetLOC(line);
+			targets.add(targetLocation);
+			
+			//TODO: Implement zig zag pattern to GATHER from all tiles within jackpot
+		}
+		// now our Rover Would have reached the target location by this line.
+		if((currentLocation.ypos == targetLocation.ypos) && (currentLocation.xpos == targetLocation.xpos)){
+			// collect science.
+			out.println("GATHER");						
+			targetLocation = targets.poll();
+		}
+		if(currentLocation.xpos < targetLocation.xpos){
+			possibleDirections.add(1);
+		}
+		else if(currentLocation.xpos > targetLocation.xpos){
+			possibleDirections.add(3);
+		}
+		if(currentLocation.ypos < targetLocation.ypos){
+			possibleDirections.add(2);
+		}
+		else if(currentLocation.xpos > targetLocation.ypos){
+			possibleDirections.add(0);
+		}
+		return possibleDirections;
+	}
+
+	// makes rover pursue closest target first
+	private Coord getClosestTarget(Coord currentLocation, Queue<Coord> targets) {
+		double closestTarget = Double.MAX_VALUE;
+		Coord closestCoord = null;
+
+		for (Coord t : targets){
+			double tXpos = t.xpos;
+			double tYpos = t.ypos;
+			double cXpos = currentLocation.xpos;
+			double cYpos = currentLocation.ypos;
+
+			double distance = distanceFormula(tXpos, tYpos, cXpos, cYpos);
+			if (distance < closestTarget){
+				closestTarget = distance;
+				closestCoord = t;
+			}
+		}
+		return closestCoord;
+	}
+
+	private double distanceFormula(double x1, double y1, double x2, double y2) {
+		return Math.sqrt(Math.pow((x2-x1),2)+Math.pow((y2-y1),2));
+	}
+
+	public static int getRandom(int max){ 
+		return (int) (Math.random()*max);
+	}
+
+
+	private boolean roverStuckIncurrentDir(int currentDir, MapTile[][] scanMapTiles, int centerIndex) {
+		boolean returnValue = false;
+		switch (cardinals[currentDir]) {
+		case "N":
+
+			if(scanMapTiles[centerIndex][centerIndex - 1].getHasRover() || scanMapTiles[centerIndex][centerIndex - 1].getTerrain() == Terrain.ROCK
+			|| scanMapTiles[centerIndex][centerIndex - 1].getTerrain() == Terrain.NONE )
+			{
+				returnValue = true;
+			}
+			break;
+		case "E":
+			if(scanMapTiles[centerIndex + 1][centerIndex].getHasRover() || scanMapTiles[centerIndex + 1][centerIndex].getTerrain() == Terrain.ROCK
+			|| scanMapTiles[centerIndex + 1][centerIndex].getTerrain() == Terrain.NONE)
+			{
+				returnValue = true;
+			}
+			break; 
+		case "S":
+			if(scanMapTiles[centerIndex][centerIndex + 1].getHasRover() || scanMapTiles[centerIndex][centerIndex + 1].getTerrain() == Terrain.ROCK
+			|| scanMapTiles[centerIndex][centerIndex + 1].getTerrain() == Terrain.NONE)
+			{
+				returnValue = true;
+			}
+			break; 
+		case "W":
+			if(scanMapTiles[centerIndex - 1][centerIndex].getHasRover() || scanMapTiles[centerIndex - 1][centerIndex].getTerrain() == Terrain.ROCK
+			|| scanMapTiles[centerIndex - 1][centerIndex].getTerrain() == Terrain.NONE)
+			{
+				returnValue = true;
+			}
+			break;
+
+		}
+
+		return returnValue;
+	}
+
+	// ################ Support Methods ###########################
+
+	public int getRandomDirection(int current) {
+		Random r = new Random();
+		int Low = 0;
+		int High = 4;
+		int Result = current;
+		goingNESW[current] = false;
+
+		while (current == Result){
+			Result = r.nextInt(High-Low) + Low;
+		}
+		goingNESW[Result] = true;
+		return Result;
+	}
+
+	public int getRandomDirection(int current, List<Integer> allowedDirections  ) {
+		Random r = new Random();
+		int Low = 0;
+		int High = 4;
+		int Result = current;
+		goingNESW[current] = false;
+
+
+		while ((! allowedDirections.contains(Result))){// || Result == current){
+			Result = r.nextInt(High-Low) + Low;
+		}
+		goingNESW[Result] = true;
+		return Result;
+	}
+
 	private void clearReadLineBuffer() throws IOException{
 		while(in.ready()){
 			//System.out.println("ROVER_15 clearing readLine()");
 			String garbage = in.readLine();	
 		}
 	}
-	
+
 
 	// method to retrieve a list of the rover's equipment from the server
 	private ArrayList<String> getEquipment() throws IOException {
 		//System.out.println("ROVER_15 method getEquipment()");
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 		out.println("EQUIPMENT");
-		
+
 		String jsonEqListIn = in.readLine(); //grabs the string that was returned first
 		if(jsonEqListIn == null){
 			jsonEqListIn = "";
 		}
 		StringBuilder jsonEqList = new StringBuilder();
 		//System.out.println("ROVER_15 incomming EQUIPMENT result - first readline: " + jsonEqListIn);
-		
+
 		if(jsonEqListIn.startsWith("EQUIPMENT")){
 			while (!(jsonEqListIn = in.readLine()).equals("EQUIPMENT_END")) {
 				if(jsonEqListIn == null){
@@ -264,15 +419,15 @@ public class ROVER_15
 			clearReadLineBuffer();
 			return null; // server response did not start with "EQUIPMENT"
 		}
-		
+
 		String jsonEqListString = jsonEqList.toString();		
 		ArrayList<String> returnList;		
 		returnList = gson.fromJson(jsonEqListString, new TypeToken<ArrayList<String>>(){}.getType());		
 		//System.out.println("ROVER_15 returnList " + returnList);
-		
+
 		return returnList;
 	}
-	
+
 
 	// sends a SCAN request to the server and puts the result in the scanMap array
 	public void doScan() throws IOException {
@@ -287,10 +442,10 @@ public class ROVER_15
 		}
 		StringBuilder jsonScanMap = new StringBuilder();
 		System.out.println("ROVER_15 incomming SCAN result - first readline: " + jsonScanMapIn);
-		
+
 		if(jsonScanMapIn.startsWith("SCAN")){	
 			while (!(jsonScanMapIn = in.readLine()).equals("SCAN_END")) {
-				//System.out.println("ROVER_15 incomming SCAN result: " + jsonScanMapIn);
+				//System.out.println("ROVER_15 incoming SCAN result: " + jsonScanMapIn);
 				jsonScanMap.append(jsonScanMapIn);
 				jsonScanMap.append("\n");
 				//System.out.println("ROVER_15 doScan() bottom of while");
@@ -310,14 +465,12 @@ public class ROVER_15
 		// convert from the json string back to a ScanMap object
 		scanMap = gson.fromJson(jsonScanMapString, ScanMap.class);		
 	}
-	
 
+ /*
 	// this takes the LOC response string, parses out the x and x values and
 	// returns a Coord object
-	/* public static Coord extractLOC(String sStr) {
-		System.out.println("Value of sStr before substring= "+sStr);
+	public static Coord extractLOC(String sStr) {
 		sStr = sStr.substring(4);
-		System.out.println("Value of sStr after substring= "+sStr);
 		if (sStr.lastIndexOf(" ") != -1) {
 			String xStr = sStr.substring(0, sStr.lastIndexOf(" "));
 			//System.out.println("extracted xStr " + xStr);
@@ -327,67 +480,45 @@ public class ROVER_15
 			return new Coord(Integer.parseInt(xStr), Integer.parseInt(yStr));
 		}
 		return null;
-	
 	}
-	 */
-	 
+	*/
+	
 	/// retuns coord object and the loc reponse , parse out the line x and values
-	 public static Coord extractLOC(String sStr) {
-		
-		  if(sStr != null && sStr.contains(" ")){
-			  
-			  String[] tokens = sStr.split("\\s",-1 );
-			  if(tokens.length > 2){
-				  int x = 0 , y = 0 ;
-				  try{
-					  x = Integer.parseInt(tokens[1]);
-					  y = Integer.parseInt(tokens[2]);
-					  
-					  return new Coord(x,y);
-				  }
-				  catch(NumberFormatException nfe){
-					  
-					  System.out.println("Invalid number");
+		 public static Coord extractLOC(String sStr) {
+			
+			  if(sStr != null && sStr.contains(" ")){
+				  
+				  String[] tokens = sStr.split("\\s",-1 );
+				  if(tokens.length > 2){
+					  int x = 0 , y = 0 ;
+					  try{
+						  x = Integer.parseInt(tokens[1]);
+						  y = Integer.parseInt(tokens[2]);
+						  
+						  return new Coord(x,y);
+					  }
+					  catch(NumberFormatException nfe){
+						  
+						  System.out.println("Invalid number");
+					  }
 				  }
 			  }
-		  }
-		  return null;
-		
-		}
-	 
-	
-	// one of the motion dictating method (will be moved and adjusted to the appropriate location)
-	public void zigzagMotion(double[][] dct,
-			int block_size, int channel){
-
-		double[][] temp_dct = new double[block_size][block_size];
-
-		for ( int i = 0; i < dct.length; i += 8 ) {
-			for ( int j = 0; j < dct[i].length; j += 8 ) {
-
-				for ( int i1 = 0; i1 < dct.length; i1++ ) {
-					for ( int j1 = 0; j1 < dct[i1].length; j1++ ) {
-						temp_dct[i1][j1] = dct[i][j];
-					}
-				}
-
-//				for ( CodeRunLengthPair p : temp_i_rep ) {
-//					intermediate_rep.add( p );
-//				}
+			  return null;
+			
 			}
+		 
+
+	public static Coord extractTargetLOC(String sStr) {
+		sStr = sStr.substring(11);
+		if (sStr.lastIndexOf(" ") != -1) {
+			String xStr = sStr.substring(0, sStr.lastIndexOf(" "));
+			// System.out.println("extracted xStr " + xStr);
+
+			String yStr = sStr.substring(sStr.lastIndexOf(" ") + 1);
+			// System.out.println("extracted yStr " + yStr);
+			return new Coord(Integer.parseInt(xStr), Integer.parseInt(yStr));
 		}
-	}
-	
-	// location of stuck roar
-	
-	public String locOfStuck(int start,int end)
-	{
-		int i = start;
-		int j = end;
-		
-		
-		
-		return "";
+		return null;
 	}
 
 	/**
