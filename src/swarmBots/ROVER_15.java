@@ -21,30 +21,6 @@ import common.MapTile;
 import common.ScanMap;
 import enums.Terrain;
 
-
-//Making an addition to this file to check whether a remote alternat push will change it
-
-// rearanged the 2nd and 3rd line in the following comment
-
-/**
-<<<<<<< HEAD
- * The seed that this program is built on is a chat program example found here:
- * publishing their code examples
- * * http://cs.lmu.edu/~ray/notes/javanetexamples/ Many thanks to the authors for
- */
-||||||| merged common ancestors
-* The seed that this program is built on is a chat program example found here:
-* publishing their code examples
-* * http://cs.lmu.edu/~ray/notes/javanetexamples/ Many thanks to the authors for
-*/
-=======
-* The seed that this program is built on is a chat program example found here:
-* publishing their code examples
-*
-* * http://cs.lmu.edu/~ray/notes/javanetexamples/ Many thanks to the authors for
-*/
->>>>>>> 9309b415026705a958e52dd74ea3e998c0b0ebc5
-
 public class ROVER_15 {
 
 	BufferedReader in;
