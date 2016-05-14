@@ -26,6 +26,7 @@ import enums.Terrain;
 // rearanged the 2nd and 3rd line in the following comment
 
 /**
+ * 
  * The seed that this program is built on is a chat program example found here:
  * publishing their code examples
  * * http://cs.lmu.edu/~ray/notes/javanetexamples/ Many thanks to the authors for
