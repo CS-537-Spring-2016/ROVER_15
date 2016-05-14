@@ -244,8 +244,9 @@ public class ROVER_15 {
 		Coord currentLocation = extractLOC(line);
 		Coord targetLocation = null;
 
-
-		//TODO: If a rover spends more than 2 minutes trying to retrieve a target, move to next target
+		out.println("TARGET_LOC");
+		line = in.readLine();
+		Coord jackpotLocation = extractTargetLOC(line);
 
 
 		// if there are science locations in target queue, get closest one
@@ -256,10 +257,8 @@ public class ROVER_15 {
 		}
 		// else go to the jackpot location 
 		else{
-			out.println("TARGET_LOC");
-			line = in.readLine();
-			targetLocation = extractTargetLOC(line);
-			targets.add(targetLocation);
+			targets.add(jackpotLocation);
+			targetLocation = targets.element();
 
 			//TODO: Implement zig zag pattern to GATHER from all tiles within jackpot
 		}
