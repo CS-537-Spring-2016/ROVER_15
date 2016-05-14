@@ -28,7 +28,7 @@ import enums.Terrain;
  * ROVER_15  Spec:	Drive = treaders, Tool 1 = Harvester/Excavator, Tool 2 = Driller
  * 
  * 
- * testing
+ * 
  */
 
 public class ROVER_15 
@@ -331,7 +331,6 @@ public class ROVER_15
 	}
 	 */
 	 
-	
 	/// retuns coord object and the loc reponse , parse out the line x and values
 	 public static Coord extractLOC(String sStr) {
 		
