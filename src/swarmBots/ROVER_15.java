@@ -105,23 +105,16 @@ public class ROVER_15 {
 
 		Queue<Coord> targets = new LinkedList<>();
 
-		//		Coord firstTL = new Coord(20,4);
-		//		Coord secondTL = new Coord(20,10);
-		//		Coord thirdTL = new Coord(17,15);
-
-		//		targets.add(firstTL);
-		//		targets.add(secondTL);
-		//		targets.add(thirdTL);
-
 		Coord firstTL = new Coord(15,36);
 		Coord secondTL = new Coord(16,20);
 		Coord thirdTL = new Coord(20,4);
 		Coord fourthTL = new Coord(50,5);
 
-		targets.add(firstTL);
-		targets.add(secondTL);
-		targets.add(thirdTL);
-		targets.add(fourthTL);
+		// Commenting out so rover goes to jackpot first
+//		targets.add(firstTL);
+//		targets.add(secondTL);
+//		targets.add(thirdTL);
+//		targets.add(fourthTL);
 
 
 		// start Rover controller process
@@ -181,6 +174,11 @@ public class ROVER_15 {
 
 			// posting what we see to the global map for all other rovers to see
 			com.postScanMapTiles(currentLoc, scanMapTiles);
+			
+			/* TODO: Grab science Coord from global map and add to targets queue.
+			 * Make sure to exclude science where TERRAIN = ROCK;
+			 */
+			
 
 			if(blocked){
 				// if there is another rover or a rock one away, go in random direction
@@ -236,7 +234,7 @@ public class ROVER_15 {
 			System.out.println("ROVER_15 ------------ bottom process control --------------"); 
 		}
 	}
-
+	
 	private List<Integer> getDirectionsToTargetLocation(Queue<Coord> targets) throws IOException {
 		String line = "";
 		List<Integer> possibleDirections = new ArrayList<Integer>();
@@ -244,6 +242,9 @@ public class ROVER_15 {
 		line = in.readLine();
 		Coord currentLocation = extractLOC(line);
 		Coord targetLocation = null;
+
+	
+		//TODO: If a rover spends more than 2 minutes trying to retrieve a target, move to next target
 
 		// if there are science locations in target queue, get closest one
 		if(!targets.isEmpty()){
@@ -257,6 +258,8 @@ public class ROVER_15 {
 			line = in.readLine();
 			targetLocation = extractTargetLOC(line);
 			targets.add(targetLocation);
+			
+			//TODO: Implement zig zag pattern to GATHER from all tiles within jackpot
 		}
 		// now our Rover Would have reached the target location by this line.
 		if((currentLocation.ypos == targetLocation.ypos) && (currentLocation.xpos == targetLocation.xpos)){
