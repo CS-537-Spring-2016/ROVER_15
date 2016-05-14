@@ -113,9 +113,9 @@ public class ROVER_15 {
 		//		targets.add(secondTL);
 		//		targets.add(thirdTL);
 
-		Coord firstTL = new Coord(45,1);
+		Coord firstTL = new Coord(15,36);
 		Coord secondTL = new Coord(16,20);
-		Coord thirdTL = new Coord(1,1);
+		Coord thirdTL = new Coord(20,4);
 		Coord fourthTL = new Coord(50,5);
 
 		targets.add(firstTL);
@@ -146,9 +146,9 @@ public class ROVER_15 {
 			// after getting location set previous equal current to be able to check for stuckness and blocked later
 			previousLoc = currentLoc;
 
-			//			// get jackpot location
-			//			out.println("TARGET_LOC");
-			//			line = in.readLine();
+//			// get jackpot location
+//			out.println("TARGET_LOC");
+//			line = in.readLine();
 
 
 
@@ -172,6 +172,8 @@ public class ROVER_15 {
 
 
 			// ***** Driller Moving Logic *****
+			out.println("TARGET_LOC");
+			line = in.readLine();
 			// pull the MapTile array out of the ScanMap object
 			MapTile[][] scanMapTiles = scanMap.getScanMap();
 			int centerIndex = (scanMap.getEdgeSize() - 1)/2;
@@ -179,7 +181,7 @@ public class ROVER_15 {
 
 			// posting what we see to the global map for all other rovers to see
 			com.postScanMapTiles(currentLoc, scanMapTiles);
-			
+
 			if(blocked){
 				// if there is another rover or a rock one away, go in random direction
 				if(roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
@@ -196,12 +198,12 @@ public class ROVER_15 {
 				currentDir = getRandomDirection(currentDir,allowedDirections);
 			}
 			counter -= 1;
-			
+
 			if(counter < 5){
 				blocked_byNothing = true;
 				blocked = false;
 			}
-			
+
 			if(roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
 				blocked = true;
 				blocked_byNothing = false;
@@ -242,7 +244,7 @@ public class ROVER_15 {
 		line = in.readLine();
 		Coord currentLocation = extractLOC(line);
 		Coord targetLocation = null;
-		
+
 		// if there are science locations in target queue, get closest one
 		if(!targets.isEmpty()){
 //			targetLocation = targets.element();
@@ -281,19 +283,19 @@ public class ROVER_15 {
 	private Coord getClosestTarget(Coord currentLocation, Queue<Coord> targets) {
 		double closestTarget = Double.MAX_VALUE;
 		Coord closestCoord = null;
-		
-        for (Coord t : targets){
-        	double tXpos = t.xpos;
-        	double tYpos = t.ypos;
-        	double cXpos = currentLocation.xpos;
-        	double cYpos = currentLocation.ypos;
-        	
-            double distance = distanceFormula(tXpos, tYpos, cXpos, cYpos);
-            if (distance < closestTarget){
-            	closestTarget = distance;
-            	closestCoord = t;
-            }
-        }
+
+		for (Coord t : targets){
+			double tXpos = t.xpos;
+			double tYpos = t.ypos;
+			double cXpos = currentLocation.xpos;
+			double cYpos = currentLocation.ypos;
+
+			double distance = distanceFormula(tXpos, tYpos, cXpos, cYpos);
+			if (distance < closestTarget){
+				closestTarget = distance;
+				closestCoord = t;
+			}
+		}
 		return closestCoord;
 	}
 
