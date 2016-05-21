@@ -1,7 +1,5 @@
 package common;
 
-
-import common.Coord;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -23,25 +21,31 @@ public class Communication {
 
     private String url;
     JSONParser parser;
+    private String rovername;
+    private String corp_secret;
 
-    public Communication(String url){
+    public Communication(String url, String rovername, String corp_secret) {
         this.url = url;
         this.parser = new JSONParser();
+        this.rovername = rovername;
+        this.corp_secret = corp_secret;
+
     }
 
-    public String postScanMapTiles (Coord currentLoc, MapTile[][] scanMapTiles) {
+    public String postScanMapTiles(Coord currentLoc, MapTile[][] scanMapTiles) {
         JSONArray data = convertScanMapTiles(currentLoc, scanMapTiles);
 
         String charset = "UTF-8";
         URL obj = null;
         try {
-            obj = new URL(url);
+            obj = new URL(url + "/global");
             HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
             //add reuqest header
             con.setDoOutput(true);
             con.setRequestMethod("POST");
-            con.setRequestProperty("Accept", "application/json");
+            con.setRequestProperty("Rover-Name", rovername);
+            con.setRequestProperty("Corp-Secret", corp_secret);
             con.setRequestProperty("Content-Type", "application/json");
 
             byte[] jsonBytes = data.toString().getBytes("UTF-8");
@@ -102,14 +106,16 @@ public class Communication {
     }
 
     // for requesting global map
-    public JSONArray getGlobalMap(){
+    public JSONArray getGlobalMap() {
 
         URL obj = null;
-        String responseStr ="";
+        String responseStr = "";
         try {
-            obj = new URL(url);
+            obj = new URL(url + "/global");
             HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
+            con.setRequestProperty("Rover-Name", rovername);
+            con.setRequestProperty("Corp-Secret", corp_secret);
             con.setRequestMethod("GET");
 
             int responseCode = con.getResponseCode();
@@ -137,12 +143,12 @@ public class Communication {
         return parseResponseStr(responseStr);
     }
 
-    public JSONArray parseResponseStr(String response){
+    public JSONArray parseResponseStr(String response) {
         JSONArray data = null;
         try {
             data = (JSONArray) parser.parse(response);
 
-            for (Object obj: data){
+            for (Object obj : data) {
                 JSONObject json = (JSONObject) obj;
             }
 
