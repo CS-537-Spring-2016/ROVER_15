@@ -10,6 +10,7 @@ public class AStar {
 	public String searchFromGridFile(File file) {
 
 		/******find width and height of map*****/
+		// TODO: get from http://23.251.155.186:3000/api/global/size
 		String result = "";
 		int col = 0;
 		int row = 0;

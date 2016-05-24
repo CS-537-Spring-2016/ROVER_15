@@ -148,58 +148,72 @@ public class ROVER_15 {
 
 
 			//***** Communication *****
-			String url = "http://192.168.1.104:3000/api";
-			String corp_secret = "0FSj7Pn23t";
-			Communication com = new Communication(url, rovername, corp_secret);
+//			String url = "http://192.168.1.104:3000/api";
+//			String corp_secret = "0FSj7Pn23t";
+//			Communication com = new Communication(url, rovername, corp_secret);
 
 
 
 			//***** Driller Moving Logic *****
+			boolean regMotionLogic = true; 
+			if (regMotionLogic = true){
+				out.println("TARGET_LOC");
+				line = in.readLine();
+				// pull the MapTile array out of the ScanMap object
+				MapTile[][] scanMapTiles = scanMap.getScanMap();
+				int centerIndex = (scanMap.getEdgeSize() - 1)/2;
+				// tile S = y + 1; N = y - 1; E = x + 1; W = x - 1
+
+
+				// posting what we see to the global map for all other rovers to see
+//				com.postScanMapTiles(currentLoc, scanMapTiles);
+
+				/* TODO: Grab science Coord from global map and add to targets queue.
+				 * Make sure to exclude science in Tiles where TERRAIN = ROCK;
+				 */
+
+
+				if(blocked){
+					if(roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
+						currentDir = getRandomDirection(currentDir);
+					}
+					else if(counter % 25 == 0){
+						currentDir = getRandomDirection(currentDir);
+					}
+
+				}
+				if(blocked_byNothing){
+					List<Integer> allowedDirections = getDirectionsToTargetLocation(targets);
+					currentDir = getRandomDirection(currentDir,allowedDirections);
+
+				}
+				counter -= 1;
+				if(counter < 5){
+					blocked_byNothing = true;
+					blocked = false;
+				}
+				if(roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
+					blocked = true;
+					blocked_byNothing = false;
+					counter = 50;
+				}
+				if( ! roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
+					out.println("MOVE "+cardinals[currentDir]);
+				}
+			}
+			else{
+				// TO DO motion logic when rover is inseide the box
+				
+				System.out.println("rover in target location");
+			}
 			out.println("TARGET_LOC");
 			line = in.readLine();
-			// pull the MapTile array out of the ScanMap object
-			MapTile[][] scanMapTiles = scanMap.getScanMap();
-			int centerIndex = (scanMap.getEdgeSize() - 1)/2;
-			// tile S = y + 1; N = y - 1; E = x + 1; W = x - 1
-
-
-			// posting what we see to the global map for all other rovers to see
-			com.postScanMapTiles(currentLoc, scanMapTiles);
-
-			/* TODO: Grab science Coord from global map and add to targets queue.
-			 * Make sure to exclude science in Tiles where TERRAIN = ROCK;
-			 */
-
-
-			if(blocked){
-				if(roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
-					currentDir = getRandomDirection(currentDir);
-				}
-				else if(counter % 25 == 0){
-					currentDir = getRandomDirection(currentDir);
-				}
-
+			Coord jackpotLocation = extractTargetLOC(line);
+			
+			
+			if(checkRoverInsideTheTarget(currentLoc,jackpotLocation)){
+				regMotionLogic = false;
 			}
-			if(blocked_byNothing){
-				List<Integer> allowedDirections = getDirectionsToTargetLocation(targets);
-				currentDir = getRandomDirection(currentDir,allowedDirections);
-
-			}
-			counter -= 1;
-			if(counter < 5){
-				blocked_byNothing = true;
-				blocked = false;
-			}
-			if(roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
-				blocked = true;
-				blocked_byNothing = false;
-				counter = 50;
-			}
-			if( ! roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
-				out.println("MOVE "+cardinals[currentDir]);
-			}
-
-
 
 			// another call for current location
 			out.println("LOC");
@@ -224,6 +238,18 @@ public class ROVER_15 {
 
 		}
 
+	}
+
+	private boolean checkRoverInsideTheTarget(Coord currentLoc, Coord jackpotLocation) {
+		// TODO Auto-generated method stub
+		int xAxisLowerLimit = jackpotLocation.xpos - 4;
+		int xAxisUpperLimit = jackpotLocation.xpos + 4;
+		int yAxisLowerLimit = jackpotLocation.ypos - 4;
+		int yAxisUpperLimit = jackpotLocation.ypos + 4;
+		if((currentLoc.xpos > xAxisLowerLimit && currentLoc.xpos < xAxisUpperLimit) && (currentLoc.ypos > yAxisLowerLimit && currentLoc.ypos < yAxisUpperLimit)){
+			return true;
+		}
+		return false;
 	}
 
 	private List<Integer> getDirectionsToTargetLocation(Queue<Coord> targets) throws IOException {
@@ -252,7 +278,16 @@ public class ROVER_15 {
 
 			//TODO: Implement zig zag pattern to GATHER from all tiles within jackpot
 		}
-
+		
+		// Identify when rover is in Jackpot box
+		int[][] jackpotBox = new int[4][4];
+		for (int row = 0; row < 4; row++ ) {
+		    for (int col = 0; col < 4; col++ ) {
+		    	// apply logic to collect each coordinate
+		    	
+		    }
+		}
+		
 		// now our Rover Would have reached the target location by this line.
 		if((currentLocation.ypos == targetLocation.ypos) && (currentLocation.xpos == targetLocation.xpos)){
 			// collect science.
