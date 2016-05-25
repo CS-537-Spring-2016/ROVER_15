@@ -7,22 +7,25 @@
 package swarmBots;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.Socket;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.PriorityQueue;
+
 
 import java.util.Queue;
 import java.util.Random;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.ParseException;
-import org.json.simple.parser.JSONParser;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -58,6 +61,7 @@ public class ROVER_15 {
 	public static String[] cardinals = {"N","E","S","W"};
 	public static int counter = 0;
 	Queue<Coord> targets;
+	
 	public ROVER_15() {
 		// constructor
 		System.out.println("ROVER_15 rover object constructed");
@@ -80,8 +84,9 @@ public class ROVER_15 {
 	/**
 	 * Connects to the server then enters the processing loop.
 	 */
-	private void run() throws IOException, InterruptedException {
 
+	private void run() throws IOException, InterruptedException {
+		
 		// Make connection and initialize streams
 		//TODO - need to close this socket
 		Socket socket = new Socket(SERVER_ADDRESS, PORT_ADDRESS); // set port here
@@ -130,6 +135,8 @@ public class ROVER_15 {
 		
 		// start Rover controller process
 		while (true) {
+			System.out.println(targets);
+
 			
 			// currently the requirements allow sensor calls to be made with no
 			// simulated resource cost
@@ -173,7 +180,7 @@ public class ROVER_15 {
 			
 			int centerIndex = (scanMap.getEdgeSize() - 1)/2;
 			// tile S = y + 1; N = y - 1; E = x + 1; W = x - 1
-			
+
 			com.postScanMapTiles(currentLoc, scanMapTiles);
 			
 			//getting JSON data from communication server
@@ -209,7 +216,7 @@ public class ROVER_15 {
 			}
 		
 			if(blocked_byNothing){
-				List<Integer> allowedDirections = getDirectionsToTargetLocation(targets);
+				List<Integer> allowedDirections = getDirectionsToTargetLocation(targets,com,url,corp_secret);
 				for(Integer i :allowedDirections)
 				{
 					if(i==5)
@@ -275,8 +282,9 @@ public class ROVER_15 {
 
 	}
 	
-	private List<Integer> getDirectionsToTargetLocation(Queue<Coord> targets) throws IOException {
+	private List<Integer> getDirectionsToTargetLocation(Queue<Coord> targets,Communication com,String url,String corp_secret) throws IOException {
 		String line = "";
+		MapTile[][] scanMapTiles = scanMap.getScanMap();
 		List<Integer> possibleDirections = new ArrayList<Integer>();
 		out.println("LOC");
 		line = in.readLine();
@@ -312,7 +320,7 @@ public class ROVER_15 {
 			
 			if((currentLocation.xpos==jackpotLocation.xpos) && (currentLocation.ypos==jackpotLocation.ypos))
 			{
-				System.out.println("Jackpot reached. So gathering blindly.");
+				System.out.println("Jackpot reached. Now gathering blindly.");
 				leftTop = new Coord(jackpotLocation.xpos-3,jackpotLocation.ypos-3);
 				leftBottom = new Coord(jackpotLocation.xpos-3,jackpotLocation.ypos+3);
 				rightBottom = new Coord(jackpotLocation.xpos+3,jackpotLocation.ypos+3);
@@ -322,7 +330,44 @@ public class ROVER_15 {
 				targets.add(rightBottom);
 				possibleDirections.add(5);
 			}
+			URL obj = null;
+			JSONArray data = com.convertScanMapTiles(currentLocation, scanMapTiles);
+			String responseStr = "";
+			try
+			{
+				obj = new URL(url + "/science/gather/"+targetLocation.xpos+"/"+targetLocation.ypos);
+	            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+	            con.setRequestProperty("Rover-Name", rovername);
+	            con.setRequestProperty("Corp-Secret", corp_secret);
+	            con.setRequestMethod("POST");
+
+	            int responseCode = con.getResponseCode();
+	            System.out.println("\nSending 'POST' request to URL : " + url);
+	            System.out.println("Response Code : " + responseCode);
+
+	            BufferedReader in = new BufferedReader(
+	                    new InputStreamReader(con.getInputStream()));
+	            String inputLine;
+	            StringBuffer response = new StringBuffer();
+
+	            while ((inputLine = in.readLine()) != null) {
+	                response.append(inputLine);
+	            }
+	            in.close();
+
+	            responseStr = response.toString();
+			}
+			catch (MalformedURLException e) {
+	            e.printStackTrace();
+	        } catch (ProtocolException e) {
+	            e.printStackTrace();
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
 			targetLocation = targets.poll();
+			
+			
 		}
 		if(currentLocation.xpos < targetLocation.xpos){
 			possibleDirections.add(1);
@@ -458,7 +503,7 @@ public class ROVER_15 {
 		return returnList;
 	}
 	
-
+	
 	// sends a SCAN request to the server and puts the result in the scanMap array
 	public void doScan() throws IOException {
 		//System.out.println("ROVER_15 method doScan()");
