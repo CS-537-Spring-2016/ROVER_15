@@ -1,5 +1,3 @@
-
-
 package common;
 
 import org.json.simple.JSONArray;
@@ -36,7 +34,7 @@ public class Communication {
 
     public String postScanMapTiles(Coord currentLoc, MapTile[][] scanMapTiles) {
         JSONArray data = convertScanMapTiles(currentLoc, scanMapTiles);
-
+        
         String charset = "UTF-8";
         URL obj = null;
         try {
@@ -83,7 +81,8 @@ public class Communication {
         return "";
     }
 
-    private JSONArray convertScanMapTiles(Coord currentLoc, MapTile[][] scanMapTiles) {
+    
+    public JSONArray convertScanMapTiles(Coord currentLoc, MapTile[][] scanMapTiles) {
         int edgeSize = scanMapTiles.length;
         int centerIndex = (edgeSize - 1) / 2;
 
