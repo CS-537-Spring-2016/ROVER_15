@@ -183,6 +183,7 @@ public class ROVER_15 {
 					if(jsonObject.get("g")!=null){
 						gathered = true;
 					}
+					//will add to our local targets linked list every time there is a new target scanned by other rovers
 					if(!terrain.equals("ROCK") && !targets.contains(coord) && !gathered){
 						targets.add(coord);
 					}
@@ -289,6 +290,9 @@ public class ROVER_15 {
 		line = in.readLine();
 		Coord currentLocation = extractLOC(line);
 		Coord targetLocation = null;
+//		Coord leftTop=null;
+//		Coord leftBottom = null;
+//		Coord rightBottom = null;
 		out.println("TARGET_LOC");
 		line = in.readLine();
 		Coord jackpotLocation = extractTargetLOC(line);
@@ -308,6 +312,26 @@ public class ROVER_15 {
 			System.out.println("Jackpot box reached. Now gathering blindly.");
 			out.println("GATHER");	
 
+//		    }		
+//			//when reaches the jackpot location i.e., 79,51 GATHER it and add 3 corners of jackpot box as target
+//			if((currentLocation.ypos == targetLocation.ypos) && (currentLocation.xpos == targetLocation.xpos)){
+//				// collect science. Ran out of time in class. TODO: Finish
+//				out.println("GATHER");				
+//				
+//				if((currentLocation.xpos==jackpotLocation.xpos) && (currentLocation.ypos==jackpotLocation.ypos))
+//				{
+//					System.out.println("Jackpot reached. Now gathering blindly.");
+//					leftTop = new Coord(jackpotLocation.xpos-3,jackpotLocation.ypos-3);
+//					leftBottom = new Coord(jackpotLocation.xpos-3,jackpotLocation.ypos+3);
+//					rightBottom = new Coord(jackpotLocation.xpos+3,jackpotLocation.ypos+3);
+//					targets.add(leftTop);
+//					//targets.add(rightTop);
+//					targets.add(leftBottom);
+//					targets.add(rightBottom);
+//					possibleDirections.add(5);
+//				}
+			
+			
 			URL obj = null;
 			JSONArray data = com.convertScanMapTiles(currentLocation, scanMapTiles);
 			String responseStr = "";
