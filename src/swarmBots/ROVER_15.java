@@ -246,17 +246,18 @@ public class ROVER_15 {
 				}
 			}
 			else{
-				// TODO: motion logic when rover is inside the box
-				System.out.println("rover in target location");
+				// Motion logic when rover is inside the box. 
+				System.out.println("rover in jackpot location");
 			}
+			
 			out.println("TARGET_LOC");
 			line = in.readLine();
 			Coord jackpotLocation = extractTargetLOC(line);
 
+			// Turns off regular motion logic when inside jackpot
 			if(checkRoverInJackpot(currentLoc,jackpotLocation)){
 				regMotionLogic = false;
 			}
-
 
 			// another call for current location
 			out.println("LOC");
@@ -303,9 +304,6 @@ public class ROVER_15 {
 		line = in.readLine();
 		Coord currentLocation = extractLOC(line);
 		Coord targetLocation = null;
-		Coord leftTop=null;
-		Coord leftBottom = null;
-		Coord rightBottom = null;
 		out.println("TARGET_LOC");
 		line = in.readLine();
 		Coord jackpotLocation = extractTargetLOC(line);
@@ -313,7 +311,7 @@ public class ROVER_15 {
 		if(!targets.isEmpty())
 		{
 			targetLocation = targets.element();
-			System.out.println("Current target = "+targetLocation);
+			System.out.println("Current target = "+ targetLocation);
 		}
 		else //if targets queue is empty then only go to jackpot location
 		{
@@ -322,27 +320,14 @@ public class ROVER_15 {
 		}
 
 		//when enters the jackpot box start gathering
-		if((Math.abs(currentLocation.xpos-jackpotLocation.xpos)<=3) || (Math.abs(currentLocation.ypos-jackpotLocation.ypos)<=3))
-		{
+		if((Math.abs(currentLocation.xpos-jackpotLocation.xpos)<=3) || (Math.abs(currentLocation.ypos-jackpotLocation.ypos)<=3)){
+			System.out.println("Jackpot box reached. Now gathering blindly.");
 			out.println("GATHER");
-		}
-		//when reaches the jackpot location i.e., 79,51 GATHER it and add 3 corners of jackpot box as target
-		if((currentLocation.ypos == targetLocation.ypos) && (currentLocation.xpos == targetLocation.xpos)){
-			// collect science. Ran out of time in class. TODO: Finish
-			out.println("GATHER");				
+			
+			// TODO: Add all tiles that are not rock to targets
+			
 
-			if((currentLocation.xpos==jackpotLocation.xpos) && (currentLocation.ypos==jackpotLocation.ypos))
-			{
-				System.out.println("Jackpot reached. Now gathering blindly.");
-				leftTop = new Coord(jackpotLocation.xpos-3,jackpotLocation.ypos-3);
-				leftBottom = new Coord(jackpotLocation.xpos-3,jackpotLocation.ypos+3);
-				rightBottom = new Coord(jackpotLocation.xpos+3,jackpotLocation.ypos+3);
-				targets.add(leftTop);
-				//targets.add(rightTop);
-				targets.add(leftBottom);
-				targets.add(rightBottom);
-				possibleDirections.add(5);
-			}
+			
 			URL obj = null;
 			JSONArray data = com.convertScanMapTiles(currentLocation, scanMapTiles);
 			String responseStr = "";
