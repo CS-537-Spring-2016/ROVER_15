@@ -308,9 +308,10 @@ public class ROVER_15 {
 		line = in.readLine();
 		Coord jackpotLocation = extractTargetLOC(line);
 
+		// If there are science locations in target queue, get closest one
 		if(!targets.isEmpty())
 		{
-			targetLocation = targets.element();
+			targetLocation = getClosestTarget(currentLocation, targets);
 			System.out.println("Current target = "+ targetLocation);
 		}
 		else //if targets queue is empty then only go to jackpot location
@@ -322,10 +323,7 @@ public class ROVER_15 {
 		//when enters the jackpot box start gathering
 		if((Math.abs(currentLocation.xpos-jackpotLocation.xpos)<=3) || (Math.abs(currentLocation.ypos-jackpotLocation.ypos)<=3)){
 			System.out.println("Jackpot box reached. Now gathering blindly.");
-			out.println("GATHER");
-			
-			// TODO: Add all tiles that are not rock to targets
-			
+			out.println("GATHER");			
 
 			
 			URL obj = null;
@@ -381,6 +379,30 @@ public class ROVER_15 {
 		}
 		return possibleDirections;
 	}
+
+	// makes rover pursue closest target first
+		private Coord getClosestTarget(Coord currentLocation, Queue<Coord> targets) {
+			double closestTarget = Double.MAX_VALUE;
+			Coord closestCoord = null;
+
+			for (Coord t : targets){
+				double tXpos = t.xpos;
+				double tYpos = t.ypos;
+				double cXpos = currentLocation.xpos;
+				double cYpos = currentLocation.ypos;
+
+				double distance = distanceFormula(tXpos, tYpos, cXpos, cYpos);
+				if (distance < closestTarget){
+					closestTarget = distance;
+					closestCoord = t;
+				}
+			}
+			return closestCoord;
+		}
+
+		private double distanceFormula(double x1, double y1, double x2, double y2) {
+			return Math.sqrt(Math.pow((x2-x1),2)+Math.pow((y2-y1),2));
+		}
 
 	public static int getRandom(int max){ 
 		return (int) (Math.random()*max);
