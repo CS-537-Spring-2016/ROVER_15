@@ -169,6 +169,7 @@ public class ROVER_15 {
 				com.postScanMapTiles(currentLoc, scanMapTiles);
 
 
+				//BUG: I ran this is debug mode and looks like it only adds 1 target and stops
 				// ***** Get JSON data from communication server *****
 				//communicationWithJSON
 				for(Object o:excavationJSONData){
@@ -183,7 +184,7 @@ public class ROVER_15 {
 					if(jsonObject.get("g")!=null){
 						gathered = true;
 					}
-					//will add to our local targets linked list every time there is a new target scanned by other rovers
+					//will  every time there is a new target scanned by other rovers
 					if(!terrain.equals("ROCK") && !targets.contains(coord) && !gathered){
 						targets.add(coord);
 					}
