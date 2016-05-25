@@ -1,7 +1,6 @@
 package swarmBots;
 
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -13,17 +12,13 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-
-
 import java.util.Queue;
 import java.util.Random;
-
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-
 import common.Communication;
 import common.Coord;
 import common.MapTile;
@@ -31,15 +26,13 @@ import common.ScanMap;
 import enums.Terrain;
 
 
-//Making an addition to this file to check whether a remote alternat push will change it
-
-// rearanged the 2nd and 3rd line in the following comment
+// Making an addition to this file to check whether a remote alternat push will change it
+// Rearanged the 2nd and 3rd line in the following comment
 
 /**
  * The seed that this program is built on is a chat program example found here:
  * publishing their code examples
- *
- * * http://cs.lmu.edu/~ray/notes/javanetexamples/ Many thanks to the authors for
+ * http://cs.lmu.edu/~ray/notes/javanetexamples/ Many thanks to the authors for
  */
 
 public class ROVER_15 {
@@ -82,15 +75,14 @@ public class ROVER_15 {
 	private void run() throws IOException, InterruptedException {
 
 		// Make connection and initialize streams
-		//TODO - need to close this socket
+		// TODO - need to close this socket
 		Socket socket = new Socket(SERVER_ADDRESS, PORT_ADDRESS); // set port here
 		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		out = new PrintWriter(socket.getOutputStream(), true);
 
 		//Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-		// Process all messages from server, wait until server requests Rover ID
-		// name
+		// Process all messages from server, wait until server requests Rover ID name
 		while (true) {
 			String line = in.readLine();
 			if (line.startsWith("SUBMITNAME")) {
@@ -105,24 +97,23 @@ public class ROVER_15 {
 		// int cnt=0;
 		String line = "";
 
-
 		boolean stuck = false; // just means it did not change locations between requests,
 		// could be velocity limit or obstruction etc.
 		boolean blocked = false;
 		boolean blocked_byNothing = false;
 		boolean reachedJackpot = false;
 
-
 		int currentDir = 3;
 		Coord currentLoc = null;
 		Coord previousLoc = null;
-		//krish
-		//communicationWithJSON
-		//getting data from the globalMap. go in the following URL which is
-		// 23.551.155.186:3000/api/ to see the api instructions created by Sam
-		// we get data through 23.551.155.186:3000/api/science/excavate because ours is excavators
-		//if you go and check in communication class's getGlobalMap() function, there you can see we have specified 'science/excavate'
-		//TODO: getting stuck at x-coordinate = 1
+		
+		
+		/*Krish: communicationWithJSON
+		 * getting data from the globalMap. go in the following URL which is
+		 * 23.551.155.186:3000/api/ to see the api instructions created by Sam
+		 * we get data through 23.551.155.186:3000/api/science/excavate because ours is excavators
+		 * if you go and check in communication class's getGlobalMap() function, there you can see we have specified 'science/excavate' */
+	
 		String url = "http://23.251.155.186:3000/api";
 		String corp_secret = "0FSj7Pn23t";
 		Communication com = new Communication(url, rovername, corp_secret);
@@ -131,11 +122,10 @@ public class ROVER_15 {
 		while (true) {
 			System.out.println(targets);
 
-
-			// currently the requirements allow sensor calls to be made with no
-			// simulated resource cost
+			// currently the requirements allow sensor calls to be made with no simulated resource cost
 			JSONArray excavationJSONData = com.getGlobalMap();
 
+			
 			// **** location call ****
 			out.println("LOC");
 			line = in.readLine();
@@ -152,14 +142,12 @@ public class ROVER_15 {
 			// after getting location set previous equal current to be able to check for stuckness and blocked later
 			previousLoc = currentLoc;
 
-
-
+			
 			// **** get equipment listing ****			
 			ArrayList<String> equipment = new ArrayList<String>();
 			equipment = getEquipment();
 			//System.out.println("ROVER_15 equipment list results drive " + equipment.get(0));
 			System.out.println("ROVER_15 equipment list results " + equipment + "\n");
-
 
 
 			// ***** do a SCAN *****
@@ -168,6 +156,7 @@ public class ROVER_15 {
 			scanMap.debugPrintMap();
 			MapTile[][] scanMapTiles = scanMap.getScanMap();
 
+			
 			// ***** Driller Moving Logic *****
 			boolean regMotionLogic = true;
 			if (regMotionLogic = true){
@@ -179,9 +168,8 @@ public class ROVER_15 {
 				// tile S = y + 1; N = y - 1; E = x + 1; W = x - 1
 				com.postScanMapTiles(currentLoc, scanMapTiles);
 
-				
-				// ***** Get JSON data from communication server *****
 
+				// ***** Get JSON data from communication server *****
 				//communicationWithJSON
 				for(Object o:excavationJSONData){
 					JSONObject jsonObject = (JSONObject)o;
@@ -201,7 +189,7 @@ public class ROVER_15 {
 				}
 				//Communication part ends :)
 
-				
+
 				if(blocked){
 					if(roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
 						currentDir = getRandomDirection(currentDir);
@@ -214,19 +202,19 @@ public class ROVER_15 {
 				if(blocked_byNothing){
 					List<Integer> allowedDirections = getDirectionsToTargetLocation(targets,com,url,corp_secret);
 					currentDir = getRandomDirection(currentDir,allowedDirections);
-//					for(Integer i :allowedDirections){
-//						if(i==5){
-//							allowedDirections.remove(i);
-//							reachedJackpot = true;
-//						}
-//					}
-//
-//					if(reachedJackpot == true){
-//						blocked = false;
-//						blocked_byNothing = true;
-//					}
-//
-//					else currentDir = getRandomDirection(currentDir,allowedDirections);
+					//					for(Integer i :allowedDirections){
+					//						if(i==5){
+					//							allowedDirections.remove(i);
+					//							reachedJackpot = true;
+					//						}
+					//					}
+					//
+					//					if(reachedJackpot == true){
+					//						blocked = false;
+					//						blocked_byNothing = true;
+					//					}
+					//
+					//					else currentDir = getRandomDirection(currentDir,allowedDirections);
 				}
 
 				counter -= 1;
@@ -246,10 +234,10 @@ public class ROVER_15 {
 				}
 			}
 			else{
-				// Motion logic when rover is inside the box. 
+				// TODO: Rover is inside the jackpot box. Regular motion logic is off at this point. 
 				System.out.println("rover in jackpot location");
 			}
-			
+
 			out.println("TARGET_LOC");
 			line = in.readLine();
 			Coord jackpotLocation = extractTargetLOC(line);
@@ -275,13 +263,10 @@ public class ROVER_15 {
 			System.out.println("ROVER_15 stuck test " + stuck);
 			System.out.println("ROVER_15 blocked test " + blocked);
 
-
 			Thread.sleep(sleepTime);
 
 			System.out.println("ROVER_15 ------------ bottom process control --------------"); 
-
 		}
-
 	}
 
 	// Creates a box around the target Coord to indicate the entire jackpot box
@@ -309,13 +294,11 @@ public class ROVER_15 {
 		Coord jackpotLocation = extractTargetLOC(line);
 
 		// If there are science locations in target queue, get closest one
-		if(!targets.isEmpty())
-		{
+		if(!targets.isEmpty()){
 			targetLocation = getClosestTarget(currentLocation, targets);
 			System.out.println("Current target = "+ targetLocation);
 		}
-		else //if targets queue is empty then only go to jackpot location
-		{
+		else{ //if targets queue is empty then only go to jackpot location
 			targets.add(jackpotLocation);
 			targetLocation = targets.element();
 		}
@@ -323,14 +306,12 @@ public class ROVER_15 {
 		//when enters the jackpot box start gathering
 		if((Math.abs(currentLocation.xpos-jackpotLocation.xpos)<=3) || (Math.abs(currentLocation.ypos-jackpotLocation.ypos)<=3)){
 			System.out.println("Jackpot box reached. Now gathering blindly.");
-			out.println("GATHER");			
+			out.println("GATHER");	
 
-			
 			URL obj = null;
 			JSONArray data = com.convertScanMapTiles(currentLocation, scanMapTiles);
 			String responseStr = "";
-			try
-			{
+			try{
 				obj = new URL(url + "/science/gather/"+targetLocation.xpos+"/"+targetLocation.ypos);
 				HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
@@ -347,7 +328,7 @@ public class ROVER_15 {
 				String inputLine;
 				StringBuffer response = new StringBuffer();
 
-				while ((inputLine = in.readLine()) != null) {
+				while ((inputLine = in.readLine()) != null){
 					response.append(inputLine);
 				}
 				in.close();
@@ -362,9 +343,8 @@ public class ROVER_15 {
 				e.printStackTrace();
 			}
 			targetLocation = targets.poll();
-
-
 		}
+		
 		if(currentLocation.xpos < targetLocation.xpos){
 			possibleDirections.add(1);
 		}
@@ -381,33 +361,24 @@ public class ROVER_15 {
 	}
 
 	// makes rover pursue closest target first
-		private Coord getClosestTarget(Coord currentLocation, Queue<Coord> targets) {
-			double closestTarget = Double.MAX_VALUE;
-			Coord closestCoord = null;
+	private Coord getClosestTarget(Coord currentLocation, Queue<Coord> targets) {
+		double closestTarget = Double.MAX_VALUE;
+		Coord closestCoord = null;
 
-			for (Coord t : targets){
-				double tXpos = t.xpos;
-				double tYpos = t.ypos;
-				double cXpos = currentLocation.xpos;
-				double cYpos = currentLocation.ypos;
+		for (Coord t : targets){
+			double tXpos = t.xpos;
+			double tYpos = t.ypos;
+			double cXpos = currentLocation.xpos;
+			double cYpos = currentLocation.ypos;
 
-				double distance = distanceFormula(tXpos, tYpos, cXpos, cYpos);
-				if (distance < closestTarget){
-					closestTarget = distance;
-					closestCoord = t;
-				}
+			double distance = distanceFormula(tXpos, tYpos, cXpos, cYpos);
+			if (distance < closestTarget){
+				closestTarget = distance;
+				closestCoord = t;
 			}
-			return closestCoord;
 		}
-
-		private double distanceFormula(double x1, double y1, double x2, double y2) {
-			return Math.sqrt(Math.pow((x2-x1),2)+Math.pow((y2-y1),2));
-		}
-
-	public static int getRandom(int max){ 
-		return (int) (Math.random()*max);
+		return closestCoord;
 	}
-
 
 	private boolean roverStuckIncurrentDir(int currentDir, MapTile[][] scanMapTiles, int centerIndex) {
 		boolean returnValue = false;
@@ -441,13 +412,19 @@ public class ROVER_15 {
 				returnValue = true;
 			}
 			break;
-
 		}
-
 		return returnValue;
 	}
 
 	// ################ Support Methods ###########################
+	
+	private double distanceFormula(double x1, double y1, double x2, double y2) {
+		return Math.sqrt(Math.pow((x2-x1),2)+Math.pow((y2-y1),2));
+	}
+
+	public static int getRandom(int max){ 
+		return (int) (Math.random()*max);
+	}
 
 	public int getRandomDirection(int current) {
 		Random r = new Random();
@@ -470,7 +447,6 @@ public class ROVER_15 {
 		int Result = current;
 		goingNESW[current] = false;
 
-
 		while ((! allowedDirections.contains(Result))){// || Result == current){
 			Result = r.nextInt(High-Low) + Low;
 		}
@@ -484,7 +460,6 @@ public class ROVER_15 {
 			String garbage = in.readLine();	
 		}
 	}
-
 
 	// method to retrieve a list of the rover's equipment from the server
 	private ArrayList<String> getEquipment() throws IOException {
@@ -501,9 +476,8 @@ public class ROVER_15 {
 
 		if(jsonEqListIn.startsWith("EQUIPMENT")){
 			while (!(jsonEqListIn = in.readLine()).equals("EQUIPMENT_END")) {
-				if(jsonEqListIn == null){
-					break;
-				}
+				if(jsonEqListIn == null)break;
+
 				//System.out.println("ROVER_15 incomming EQUIPMENT result: " + jsonEqListIn);
 				jsonEqList.append(jsonEqListIn);
 				jsonEqList.append("\n");
@@ -522,7 +496,6 @@ public class ROVER_15 {
 
 		return returnList;
 	}
-
 
 	// sends a SCAN request to the server and puts the result in the scanMap array
 	public void doScan() throws IOException {
@@ -561,9 +534,7 @@ public class ROVER_15 {
 		scanMap = gson.fromJson(jsonScanMapString, ScanMap.class);		
 	}
 
-
-	// this takes the LOC response string, parses out the x and x values and
-	// returns a Coord object
+	// Takes the LOC response string, parses out the x and y values, and returns a Coord object
 	public static Coord extractLOC(String sStr) {
 		sStr = sStr.substring(4);
 		if (sStr.lastIndexOf(" ") != -1) {
@@ -589,8 +560,6 @@ public class ROVER_15 {
 		}
 		return null;
 	}
-
-
 
 
 	/**
