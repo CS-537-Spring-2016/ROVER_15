@@ -97,11 +97,11 @@ public class ROVER_15 {
 		// int cnt=0;
 		String line = "";
 
-		boolean stuck = false; // just means it did not change locations between requests,
-		// could be velocity limit or obstruction etc.
-		boolean blocked = false;
-		boolean blocked_byNothing = false;
-		boolean reachedJackpot = false;
+//		boolean stuck = false; // just means it did not change locations between requests,
+//		// could be velocity limit or obstruction etc.
+//		boolean blocked = false;
+//		boolean blocked_byNothing = false;
+//		boolean reachedJackpot = false;
 
 		int currentDir = 3;
 		Coord currentLoc = null;
@@ -191,44 +191,53 @@ public class ROVER_15 {
 			}
 			//Communication part ends :)
 
+			// Implement AStar
+			
+			out.println("LOC");
+			line = in.readLine();
+			Coord current = extractLOC(line);
+			Coord target = null;
+			
+			String motionDirections = moveUsingAStar(current, target, NEEDAMAP);
 
-			if(blocked){
-				if(roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
-					currentDir = getRandomDirection(currentDir);
-				}
-				else if(counter % 25 == 0){
-					currentDir = getRandomDirection(currentDir);
-				}
-			}
 
-			if(blocked_byNothing){
-				List<Integer> allowedDirections = getDirectionsToTargetLocation(targets,com,url,corp_secret);
-				for(Integer i :allowedDirections){
-					if(i==5){
-						allowedDirections.remove(i);
-						reachedJackpot = true;
-					}
-				}
-
-				if(reachedJackpot == true){
-					blocked = false;
-					blocked_byNothing = true;
-				} else{
-					currentDir = getRandomDirection(currentDir,allowedDirections);
-				}
-			}
-
-			counter -= 1;
-
-			if(counter < 5){
-				blocked_byNothing = true;
-				blocked = false;
-			}
-			if(roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
-				blocked = true;
-				blocked_byNothing = false;
-				counter = 50;
-			}
+//			if(blocked){
+//				if(roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
+//					currentDir = getRandomDirection(currentDir);
+//				}
+//				else if(counter % 25 == 0){
+//					currentDir = getRandomDirection(currentDir);
+//				}
+//			}
+//
+//			if(blocked_byNothing){
+//				List<Integer> allowedDirections = getDirectionsToTargetLocation(targets,com,url,corp_secret);
+//				for(Integer i :allowedDirections){
+//					if(i==5){
+//						allowedDirections.remove(i);
+//						reachedJackpot = true;
+//					}
+//				}
+//
+//				if(reachedJackpot == true){
+//					blocked = false;
+//					blocked_byNothing = true;
+//				} else{
+//					currentDir = getRandomDirection(currentDir,allowedDirections);
+//				}
+//			}
+//
+//			counter -= 1;
+//
+//			if(counter < 5){
+//				blocked_byNothing = true;
+//				blocked = false;
+//			}
+//			if(roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
+//				blocked = true;
+//				blocked_byNothing = false;
+//				counter = 50;
+//			}
 
 			if(!roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
 				out.println("MOVE "+cardinals[currentDir]);
@@ -258,11 +267,11 @@ public class ROVER_15 {
 			System.out.println("ROVER_15 currentLoc after recheck: " + currentLoc);
 			System.out.println("ROVER_15 previousLoc: " + previousLoc);
 
-			// test for stuckness
-			stuck = currentLoc.equals(previousLoc);
-
-			System.out.println("ROVER_15 stuck test " + stuck);
-			System.out.println("ROVER_15 blocked test " + blocked);
+//			// test for stuckness
+//			stuck = currentLoc.equals(previousLoc);
+//
+//			System.out.println("ROVER_15 stuck test " + stuck);
+//			System.out.println("ROVER_15 blocked test " + blocked);
 
 			Thread.sleep(sleepTime);
 
