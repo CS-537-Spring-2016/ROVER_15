@@ -4,43 +4,38 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
 
 public class AStar {
-	public String searchFromGridFile(File file) {
+	public String moveUsingAStar(Coord current, Coord target, MapTile[][] mt) {
 
-		/******find width and height of map*****/
-		// TODO: get from http://23.251.155.186:3000/api/global/size
 		String result = "";
-		int col = 0;
-		int row = 0;
 
-		/*******Populate grid from global map*******/
+		// TODO: How do we get map in here to check for terrain type?
+//		if(!terrain.equals("ROCK")){
+//			new Coord(x, y, "rock"); 
+//		}
 		
-		Tile[][] grid = new Tile[row][col];
-		Tile startTile = null;
-		Tile endTile = null;    // endTile is whatever the current target is
-		
-
 		/*******************A* Algorithm*******************/
 		
 		// initialize depth (g value)
-		startTile.setG(0);
-		startTile.setH(distBetween(startTile, endTile));
+		current.setG(0);
+		current.setH(distBetween(current, target));
 
 		// create open and closed lists
-		Comparator<Tile> comparator = new fValueComparator();
-		PriorityQueue<Tile> open = new PriorityQueue<Tile>(10, comparator);
-		List<Tile> closed = new ArrayList<>();
+		Comparator<Coord> comparator = new fValueComparator();
+		PriorityQueue<Coord> open = new PriorityQueue<Coord>(10, comparator);
+		List<Coord> closed = new ArrayList<>();
 
 		// add source node to the open queue
-		open.add(startTile);
+		open.add(current);
 
 		// while open is not empty
 		while (!open.isEmpty()){
 
 			// get Tile with the lowest f from the open list
-			Tile currentTile = open.peek();
+			Coord currentTile = open.peek();
 
 			// remove current Tile from open list
 			open.remove(currentTile);
@@ -48,10 +43,10 @@ public class AStar {
 			closed.add(currentTile); 
 
 			// if we're at the destination Tile, we're done
-			if (currentTile.equals(endTile)){
-				Tile end = endTile;
+			if (currentTile.equals(target)){
+				Coord end = target;
 				StringBuilder sb = new StringBuilder();
-				while (!end.equals(startTile)) {
+				while (!end.equals(currentTile)) {
 					sb.append(end.getParentDirection());					
 					end = end.getParent();
 				}
@@ -60,8 +55,8 @@ public class AStar {
 			}		
 			
 			/****************GO THROUGH EACH POSSIBLE NEIGHBOR*******************/
-			Tile next = null;   // neighbor
-			Tile prior = null;
+			Coord next = null;   // neighbor
+			Coord prior = null;
 
 			// checks if currentTile can move to the Right
 			if (currentTile.getY() < col-1){
@@ -70,7 +65,7 @@ public class AStar {
 				if (!next.name.equals("rock")) {
 
 					next.setG(currentTile.getG() + 1);
-					next.setH(distBetween (next, endTile));
+					next.setH(distBetween (next, target));
 
 					// if we already visited "next" we want to see if we can find a better path 
 					if (closed.contains(next)){
@@ -94,7 +89,7 @@ public class AStar {
 
 				if (!next.name.equals("rock")) {
 					next.setG(currentTile.getG() + 1);
-					next.setH(distBetween (next, endTile));
+					next.setH(distBetween (next, target));
 
 					if (closed.contains(next)){
 						prior = closed.get(closed.indexOf(next));	
@@ -117,7 +112,7 @@ public class AStar {
 
 				if (!next.name.equals("rock")) {
 					next.setG(currentTile.getG() + 1);
-					next.setH(distBetween (next, endTile));
+					next.setH(distBetween (next, target));
 
 					if (closed.contains(next)){
 						prior = closed.get(closed.indexOf(next));	
@@ -140,7 +135,7 @@ public class AStar {
 
 				if (!next.name.equals("rock")) {
 					next.setG(currentTile.getG() + 1);
-					next.setH(distBetween (next, endTile));
+					next.setH(distBetween (next, target));
 
 					// if we already visited "next" we want to see if we can find a better path 
 					if (closed.contains(next)){
@@ -162,21 +157,21 @@ public class AStar {
 	}
 
 	// using the distance formula to get Euclidean distance between 2 Tiles
-	private int distBetween(Tile currentTile, Tile next) {
+	private int distBetween(Coord currentTile, Coord next) {
 		double d = Math.sqrt(Math.pow(next.x - currentTile.x, 2) + Math.pow(next.y - currentTile.y, 2));
 		return Double.valueOf(d).intValue();
 	}
 	
-	public class Tile{
+	public class Coord{
 		private int x;
 		private int y;
 		private int g;
 		private double h;
 		private String name;
-		Tile[][] grid;
-		private Tile parent;
+		Coord[][] grid;
+		private Coord parent;
 
-		public Tile(int x, int y, String name) {
+		public Coord(int x, int y, String name) {
 			this.x = x;
 			this.y = y;
 			this.name = name;
@@ -222,27 +217,27 @@ public class AStar {
 			return name;
 		}
 
-		public Tile getLeft() {
+		public Coord getLeft() {
 			return grid[x][y-1];
 		}
 
-		public Tile getRight() {
+		public Coord getRight() {
 			return grid[x][y+1];
 		}
 
-		public Tile getUp() {
+		public Coord getUp() {
 			return grid[x-1][y];
 		}
 
-		public Tile getDown() {
+		public Coord getDown() {
 			return grid[x+1][y];
 		}
 
-		public void setParent(Tile parent) {
+		public void setParent(Coord parent) {
 			this.parent = parent;
 		}
 
-		public Tile getParent() {
+		public Coord getParent() {
 			return parent;
 		}
 
@@ -263,9 +258,9 @@ public class AStar {
 			return name;
 		}
 	}
-	public class fValueComparator implements Comparator<Tile> {
+	public class fValueComparator implements Comparator<Coord> {
 		@Override
-		public int compare(Tile x, Tile y) {
+		public int compare(Coord x, Coord y) {
 			return (int) (x.getF() - y.getF());
 		}
 	}
