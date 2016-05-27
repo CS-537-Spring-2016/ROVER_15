@@ -158,95 +158,95 @@ public class ROVER_15 {
 
 
 			// ***** Driller Moving Logic *****
-			boolean regMotionLogic = true;
-			if (regMotionLogic = true){
-				out.println("TARGET_LOC");
-				line = in.readLine();
 
-				// pull the MapTile array out of the ScanMap object
-				int centerIndex = (scanMap.getEdgeSize() - 1)/2;
-				// tile S = y + 1; N = y - 1; E = x + 1; W = x - 1
-				com.postScanMapTiles(currentLoc, scanMapTiles);
+			//			boolean regMotionLogic = true;
+			//			if (regMotionLogic = true){
+			//			out.println("TARGET_LOC");
+			//			line = in.readLine();
+
+			// pull the MapTile array out of the ScanMap object
+			int centerIndex = (scanMap.getEdgeSize() - 1)/2;
+			// tile S = y + 1; N = y - 1; E = x + 1; W = x - 1
+			com.postScanMapTiles(currentLoc, scanMapTiles);
 
 
-				//BUG: I ran this is debug mode and looks like it only adds 1 target and stops
-				// ***** Get JSON data from communication server *****
-				//communicationWithJSON
-				for(Object o:excavationJSONData){
-					JSONObject jsonObject = (JSONObject)o;
-					int x = (int)(long)jsonObject.get("x");
-					int y = (int)(long)jsonObject.get("y");
-					Coord coord = new Coord(x,y);
+			// ***** Get JSON data from communication server *****
+			//communicationWithJSON
+			for(Object o:excavationJSONData){
+				JSONObject jsonObject = (JSONObject)o;
+				int x = (int)(long)jsonObject.get("x");
+				int y = (int)(long)jsonObject.get("y");
+				Coord coord = new Coord(x,y);
 
-					//if target queue is empty or target queue already has the coordinate
-					String terrain = jsonObject.get("terrain").toString();
-					boolean gathered = false;
-					if(jsonObject.get("g")!=null){
-						gathered = true;
-					}
-					//will  every time there is a new target scanned by other rovers
-					if(!terrain.equals("ROCK") && !targets.contains(coord) && !gathered){
-						targets.add(coord);
-					}
+				//if target queue is empty or target queue already has the coordinate
+				String terrain = jsonObject.get("terrain").toString();
+				boolean gathered = false;
+				if(jsonObject.get("g")!=null){
+					gathered = true;
 				}
-				//Communication part ends :)
-
-
-				if(blocked){
-					if(roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
-						currentDir = getRandomDirection(currentDir);
-					}
-					else if(counter % 25 == 0){
-						currentDir = getRandomDirection(currentDir);
-					}
+				//will  every time there is a new target scanned by other rovers
+				if(!terrain.equals("ROCK") && !targets.contains(coord) && !gathered){
+					targets.add(coord);
 				}
+			}
+			//Communication part ends :)
 
-				if(blocked_byNothing){
-					List<Integer> allowedDirections = getDirectionsToTargetLocation(targets,com,url,corp_secret);
-					for(Integer i :allowedDirections){
-						if(i==5){
-							allowedDirections.remove(i);
-							reachedJackpot = true;
-						}
-					}
 
-					if(reachedJackpot == true){
-						blocked = false;
-						blocked_byNothing = true;
-					}
-
-					else currentDir = getRandomDirection(currentDir,allowedDirections);
-				}
-
-				counter -= 1;
-
-				if(counter < 5){
-					blocked_byNothing = true;
-					blocked = false;
-				}
+			if(blocked){
 				if(roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
-					blocked = true;
-					blocked_byNothing = false;
-					counter = 50;
+					currentDir = getRandomDirection(currentDir);
 				}
-
-				if(!roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
-					out.println("MOVE "+cardinals[currentDir]);
+				else if(counter % 25 == 0){
+					currentDir = getRandomDirection(currentDir);
 				}
 			}
-			else{
-				// TODO: Rover is inside the jackpot box. Regular motion logic is off at this point. 
-				System.out.println("rover in jackpot location");
+
+			if(blocked_byNothing){
+				List<Integer> allowedDirections = getDirectionsToTargetLocation(targets,com,url,corp_secret);
+				for(Integer i :allowedDirections){
+					if(i==5){
+						allowedDirections.remove(i);
+						reachedJackpot = true;
+					}
+				}
+
+				if(reachedJackpot == true){
+					blocked = false;
+					blocked_byNothing = true;
+				} else{
+					currentDir = getRandomDirection(currentDir,allowedDirections);
+				}
 			}
 
-			out.println("TARGET_LOC");
-			line = in.readLine();
-			Coord jackpotLocation = extractTargetLOC(line);
+			counter -= 1;
 
-			// Turns off regular motion logic when inside jackpot
-			if(checkRoverInJackpot(currentLoc,jackpotLocation)){
-				regMotionLogic = false;
+			if(counter < 5){
+				blocked_byNothing = true;
+				blocked = false;
 			}
+			if(roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
+				blocked = true;
+				blocked_byNothing = false;
+				counter = 50;
+			}
+
+			if(!roverStuckIncurrentDir(currentDir,scanMapTiles,centerIndex)){
+				out.println("MOVE "+cardinals[currentDir]);
+			}
+			//			}
+			//			else{
+			//				// TODO: Rover is inside the jackpot box. Regular motion logic is off at this point. 
+			//				System.out.println("rover in jackpot location");
+			//			}
+
+			//			out.println("TARGET_LOC");
+			//			line = in.readLine();
+			//			Coord jackpotLocation = extractTargetLOC(line);
+
+			//			// Turns off regular motion logic when inside jackpot
+			//			if(checkRoverInJackpot(currentLoc,jackpotLocation)){
+			//				regMotionLogic = false;
+			//			}
 
 			// another call for current location
 			out.println("LOC");
@@ -270,19 +270,20 @@ public class ROVER_15 {
 		}
 	}
 
-	// Creates a box around the target Coord to indicate the entire jackpot box
-	private boolean checkRoverInJackpot(Coord currentLoc, Coord jackpotLocation) {
-		int xAxisLowerLimit = jackpotLocation.xpos - 4;
-		int xAxisUpperLimit = jackpotLocation.xpos + 4;
-		int yAxisLowerLimit = jackpotLocation.ypos - 4;
-		int yAxisUpperLimit = jackpotLocation.ypos + 4;
-		if((currentLoc.xpos > xAxisLowerLimit && currentLoc.xpos < xAxisUpperLimit) && (currentLoc.ypos > yAxisLowerLimit && currentLoc.ypos < yAxisUpperLimit)){
-			return true;
-		}
-		return false;
-	}
+	//	// Creates a box around the target Coord to indicate the entire jackpot box
+	//	private boolean checkRoverInJackpot(Coord currentLoc, Coord jackpotLocation) {
+	//		int xAxisLowerLimit = jackpotLocation.xpos - 4;
+	//		int xAxisUpperLimit = jackpotLocation.xpos + 4;
+	//		int yAxisLowerLimit = jackpotLocation.ypos - 4;
+	//		int yAxisUpperLimit = jackpotLocation.ypos + 4;
+	//		if((currentLoc.xpos > xAxisLowerLimit && currentLoc.xpos < xAxisUpperLimit) && (currentLoc.ypos > yAxisLowerLimit && currentLoc.ypos < yAxisUpperLimit)){
+	//			return true;
+	//		}
+	//		return false;
+	//	}
 
-	private List<Integer> getDirectionsToTargetLocation(Queue<Coord> targets,Communication com,String url,String corp_secret) throws IOException {
+	private List<Integer> getDirectionsToTargetLocation(Queue<Coord> targets,Communication com,String url,
+			String corp_secret) throws IOException {
 		String line = "";
 		MapTile[][] scanMapTiles = scanMap.getScanMap();
 		List<Integer> possibleDirections = new ArrayList<Integer>();
@@ -290,9 +291,9 @@ public class ROVER_15 {
 		line = in.readLine();
 		Coord currentLocation = extractLOC(line);
 		Coord targetLocation = null;
-		//		Coord leftTop=null;
-		//		Coord leftBottom = null;
-		//		Coord rightBottom = null;
+		Coord leftTop = null;
+		Coord leftBottom = null;
+		Coord rightBottom = null;
 		out.println("TARGET_LOC");
 		line = in.readLine();
 		Coord jackpotLocation = extractTargetLOC(line);
@@ -312,24 +313,6 @@ public class ROVER_15 {
 			System.out.println("Jackpot box reached. Now gathering blindly.");
 			out.println("GATHER");	
 		}
-		//		    }		
-		//			//when reaches the jackpot location i.e., 79,51 GATHER it and add 3 corners of jackpot box as target
-		//			if((currentLocation.ypos == targetLocation.ypos) && (currentLocation.xpos == targetLocation.xpos)){
-		//				// collect science. Ran out of time in class. TODO: Finish
-		//				out.println("GATHER");				
-		//				
-		//				if((currentLocation.xpos==jackpotLocation.xpos) && (currentLocation.ypos==jackpotLocation.ypos))
-		//				{
-		//					System.out.println("Jackpot reached. Now gathering blindly.");
-		//					leftTop = new Coord(jackpotLocation.xpos-3,jackpotLocation.ypos-3);
-		//					leftBottom = new Coord(jackpotLocation.xpos-3,jackpotLocation.ypos+3);
-		//					rightBottom = new Coord(jackpotLocation.xpos+3,jackpotLocation.ypos+3);
-		//					targets.add(leftTop);
-		//					//targets.add(rightTop);
-		//					targets.add(leftBottom);
-		//					targets.add(rightBottom);
-		//					possibleDirections.add(5);
-		//				}
 
 		if ((currentLocation.ypos == targetLocation.ypos) && (currentLocation.xpos == targetLocation.xpos)) {
 			// collect science. 
@@ -368,6 +351,17 @@ public class ROVER_15 {
 				e.printStackTrace();
 			}
 			targetLocation = targets.poll();
+		}
+
+		if ((currentLocation.xpos == jackpotLocation.xpos) && (currentLocation.ypos == jackpotLocation.ypos)) {
+			System.out.println("Jackpot reached. Now gathering blindly.");
+			leftTop = new Coord(jackpotLocation.xpos - 3, jackpotLocation.ypos - 3);
+			leftBottom = new Coord(jackpotLocation.xpos - 3, jackpotLocation.ypos + 3);
+			rightBottom = new Coord(jackpotLocation.xpos + 3, jackpotLocation.ypos + 3);
+			targets.add(leftTop);
+			targets.add(leftBottom);
+			targets.add(rightBottom);
+			possibleDirections.add(5);
 		}
 
 		if(currentLocation.xpos < targetLocation.xpos){
