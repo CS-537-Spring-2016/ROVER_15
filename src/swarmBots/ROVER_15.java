@@ -106,14 +106,14 @@ public class ROVER_15 {
 		int currentDir = 3;
 		Coord currentLoc = null;
 		Coord previousLoc = null;
-		
-		
+
+
 		/*Krish: communicationWithJSON
 		 * getting data from the globalMap. go in the following URL which is
 		 * 23.551.155.186:3000/api/ to see the api instructions created by Sam
 		 * we get data through 23.551.155.186:3000/api/science/excavate because ours is excavators
 		 * if you go and check in communication class's getGlobalMap() function, there you can see we have specified 'science/excavate' */
-	
+
 		String url = "http://23.251.155.186:3000/api";
 		String corp_secret = "0FSj7Pn23t";
 		Communication com = new Communication(url, rovername, corp_secret);
@@ -125,7 +125,7 @@ public class ROVER_15 {
 			// currently the requirements allow sensor calls to be made with no simulated resource cost
 			JSONArray excavationJSONData = com.getGlobalMap();
 
-			
+
 			// **** location call ****
 			out.println("LOC");
 			line = in.readLine();
@@ -142,7 +142,7 @@ public class ROVER_15 {
 			// after getting location set previous equal current to be able to check for stuckness and blocked later
 			previousLoc = currentLoc;
 
-			
+
 			// **** get equipment listing ****			
 			ArrayList<String> equipment = new ArrayList<String>();
 			equipment = getEquipment();
@@ -156,7 +156,7 @@ public class ROVER_15 {
 			scanMap.debugPrintMap();
 			MapTile[][] scanMapTiles = scanMap.getScanMap();
 
-			
+
 			// ***** Driller Moving Logic *****
 			boolean regMotionLogic = true;
 			if (regMotionLogic = true){
@@ -203,20 +203,19 @@ public class ROVER_15 {
 
 				if(blocked_byNothing){
 					List<Integer> allowedDirections = getDirectionsToTargetLocation(targets,com,url,corp_secret);
-					currentDir = getRandomDirection(currentDir,allowedDirections);
-					//					for(Integer i :allowedDirections){
-					//						if(i==5){
-					//							allowedDirections.remove(i);
-					//							reachedJackpot = true;
-					//						}
-					//					}
-					//
-					//					if(reachedJackpot == true){
-					//						blocked = false;
-					//						blocked_byNothing = true;
-					//					}
-					//
-					//					else currentDir = getRandomDirection(currentDir,allowedDirections);
+					for(Integer i :allowedDirections){
+						if(i==5){
+							allowedDirections.remove(i);
+							reachedJackpot = true;
+						}
+					}
+
+					if(reachedJackpot == true){
+						blocked = false;
+						blocked_byNothing = true;
+					}
+
+					else currentDir = getRandomDirection(currentDir,allowedDirections);
 				}
 
 				counter -= 1;
@@ -291,9 +290,9 @@ public class ROVER_15 {
 		line = in.readLine();
 		Coord currentLocation = extractLOC(line);
 		Coord targetLocation = null;
-//		Coord leftTop=null;
-//		Coord leftBottom = null;
-//		Coord rightBottom = null;
+		//		Coord leftTop=null;
+		//		Coord leftBottom = null;
+		//		Coord rightBottom = null;
 		out.println("TARGET_LOC");
 		line = in.readLine();
 		Coord jackpotLocation = extractTargetLOC(line);
@@ -312,29 +311,30 @@ public class ROVER_15 {
 		if((Math.abs(currentLocation.xpos-jackpotLocation.xpos)<=3) || (Math.abs(currentLocation.ypos-jackpotLocation.ypos)<=3)){
 			System.out.println("Jackpot box reached. Now gathering blindly.");
 			out.println("GATHER");	
+		}
+		//		    }		
+		//			//when reaches the jackpot location i.e., 79,51 GATHER it and add 3 corners of jackpot box as target
+		//			if((currentLocation.ypos == targetLocation.ypos) && (currentLocation.xpos == targetLocation.xpos)){
+		//				// collect science. Ran out of time in class. TODO: Finish
+		//				out.println("GATHER");				
+		//				
+		//				if((currentLocation.xpos==jackpotLocation.xpos) && (currentLocation.ypos==jackpotLocation.ypos))
+		//				{
+		//					System.out.println("Jackpot reached. Now gathering blindly.");
+		//					leftTop = new Coord(jackpotLocation.xpos-3,jackpotLocation.ypos-3);
+		//					leftBottom = new Coord(jackpotLocation.xpos-3,jackpotLocation.ypos+3);
+		//					rightBottom = new Coord(jackpotLocation.xpos+3,jackpotLocation.ypos+3);
+		//					targets.add(leftTop);
+		//					//targets.add(rightTop);
+		//					targets.add(leftBottom);
+		//					targets.add(rightBottom);
+		//					possibleDirections.add(5);
+		//				}
 
-//		    }		
-//			//when reaches the jackpot location i.e., 79,51 GATHER it and add 3 corners of jackpot box as target
-//			if((currentLocation.ypos == targetLocation.ypos) && (currentLocation.xpos == targetLocation.xpos)){
-//				// collect science. Ran out of time in class. TODO: Finish
-//				out.println("GATHER");				
-//				
-//				if((currentLocation.xpos==jackpotLocation.xpos) && (currentLocation.ypos==jackpotLocation.ypos))
-//				{
-//					System.out.println("Jackpot reached. Now gathering blindly.");
-//					leftTop = new Coord(jackpotLocation.xpos-3,jackpotLocation.ypos-3);
-//					leftBottom = new Coord(jackpotLocation.xpos-3,jackpotLocation.ypos+3);
-//					rightBottom = new Coord(jackpotLocation.xpos+3,jackpotLocation.ypos+3);
-//					targets.add(leftTop);
-//					//targets.add(rightTop);
-//					targets.add(leftBottom);
-//					targets.add(rightBottom);
-//					possibleDirections.add(5);
-//				}
-			
-			
+		if ((currentLocation.ypos == targetLocation.ypos) && (currentLocation.xpos == targetLocation.xpos)) {
+			// collect science. 
+			out.println("GATHER");
 			URL obj = null;
-			JSONArray data = com.convertScanMapTiles(currentLocation, scanMapTiles);
 			String responseStr = "";
 			try{
 				obj = new URL(url + "/science/gather/"+targetLocation.xpos+"/"+targetLocation.ypos);
@@ -369,7 +369,7 @@ public class ROVER_15 {
 			}
 			targetLocation = targets.poll();
 		}
-		
+
 		if(currentLocation.xpos < targetLocation.xpos){
 			possibleDirections.add(1);
 		}
@@ -384,6 +384,7 @@ public class ROVER_15 {
 		}
 		return possibleDirections;
 	}
+
 
 	// makes rover pursue closest target first
 	private Coord getClosestTarget(Coord currentLocation, Queue<Coord> targets) {
@@ -442,7 +443,7 @@ public class ROVER_15 {
 	}
 
 	// ################ Support Methods ###########################
-	
+
 	private double distanceFormula(double x1, double y1, double x2, double y2) {
 		return Math.sqrt(Math.pow((x2-x1),2)+Math.pow((y2-y1),2));
 	}
