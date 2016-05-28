@@ -235,7 +235,7 @@ public class ROVER_15 {
 			}
 			//			}
 			//			else{
-			//				// TODO: Rover is inside the jackpot box. Regular motion logic is off at this point. 
+			//				// TODO: Rover is inside the jackpot box. Regular motion logic is off. Write new logic.
 			//				System.out.println("rover in jackpot location");
 			//			}
 
