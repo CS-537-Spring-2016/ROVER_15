@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 public class AStar {
-	public String moveUsingAStar(Coord current, Coord target, MapTile[][] mt) {
+	public String moveUsingAStar(Coord current, Coord target, MapTile[][] scanMapTiles) {
 
 		/******find width and height of map*****/
 		// TODO: get from http://23.251.155.186:3000/api/global/size
@@ -57,6 +57,8 @@ public class AStar {
 					end = end.getParent();
 				}
 				result = sb.reverse().toString();
+				
+				// result has the directions to tell rover where to move
 				return result;
 			}		
 			
@@ -247,6 +249,7 @@ public class AStar {
 			return parent;
 		}
 
+		// cardinal directions for the rover
 		public char getParentDirection() {
 			if (parent.x < x) {
 				return 'S';

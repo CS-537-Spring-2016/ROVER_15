@@ -24,6 +24,7 @@ import common.Coord;
 import common.MapTile;
 import common.ScanMap;
 import enums.Terrain;
+import common.AStar;
 
 
 // Making an addition to this file to check whether a remote alternat push will change it
@@ -171,6 +172,7 @@ public class ROVER_15 {
 
 
 			// ***** Get JSON data from communication server *****
+			
 			//communicationWithJSON
 			for(Object o:excavationJSONData){
 				JSONObject jsonObject = (JSONObject)o;
@@ -190,6 +192,20 @@ public class ROVER_15 {
 				}
 			}
 			//Communication part ends :)
+			
+			
+			// ***** A* Motion Logic (alternative to current motion logic) *****
+			
+//			out.println("LOC");
+//			line = in.readLine();
+//			Coord current = extractLOC(line);
+//			
+//			// grab element 0 in targets queue to pass to A*
+//			Coord target = targets.peek();
+//			
+//			// retrieve directions from A* and translate to cardinal movements
+//			String motionDirections = moveUsingAStar(current, target, scanMapTiles);
+//			out.println("MOVE "+cardinals[currentDir]);
 
 
 			if(blocked){
@@ -235,7 +251,7 @@ public class ROVER_15 {
 			}
 			//			}
 			//			else{
-			//				// TODO: Rover is inside the jackpot box. Regular motion logic is off. Write new logic.
+			//				// TODO: Regular motion logic is off. Write new jackpot motion logic.
 			//				System.out.println("rover in jackpot location");
 			//			}
 
